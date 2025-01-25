@@ -1,67 +1,101 @@
-import './App.css';
-import { Outlet } from 'react-router-dom';
-import Header from './Components/Header';
-import Footer from './Components/Footer';
-import 'react-toastify/dist/ReactToastify.css';
-import { useEffect, useState } from 'react';
-import SummaryApi from './common';
-import Context from './Context';
-import { useDispatch } from 'react-redux';
-import { setUserDetails } from './store/userSlice';
+import "./App.css";
+import { Outlet } from "react-router-dom";
+import Header from "./Components/Header";
+import Footer from "./Components/Footer";
+import "react-toastify/dist/ReactToastify.css";
+import { useEffect, useState } from "react";
+import SummaryApi from "./common";
+import Context from "./Context";
+import { useDispatch } from "react-redux";
+import { setUserDetails } from "./store/userSlice";
+import { setLoading } from "./store/userSlice";
+
 
 function App() {
-  const dispatch = useDispatch()
-  const [cartProductCount, setCartProductCount] = useState(0)
+  const dispatch = useDispatch();
+  const [cartProductCount, setCartProductCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const fetchUserDetails = async()=>{
-    const dataResponse = await fetch(SummaryApi.current_user.url,{
-      method : SummaryApi.current_user.method,
-      credentials : "include"
-    })
 
-    const dataApi = await dataResponse.json()
+const fetchUserDetails = async () => {
+  try {
+    dispatch(setLoading(true)); // Set loading to true while fetching
+    const response = await fetch(SummaryApi.current_user.url, {
+      method: SummaryApi.current_user.method,
+      credentials: "include",
+    });
 
-    if(dataApi.success){
-      dispatch(setUserDetails(dataApi.data))
-    }  
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success) {
+        dispatch(setUserDetails(data.data));
+      } else {
+        dispatch(setUserDetails(null)); // Clear user details on failure
+      }
+    } else {
+      console.error("Failed to fetch user details. Status:", response.status);
+      dispatch(setUserDetails(null));
+    }
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    dispatch(setUserDetails(null));
+  } finally {
+    dispatch(setLoading(false)); // Ensure loading is set to false
+  }
+};
 
+
+  const fetchUserAddToCart = async () => {
+    try {
+      const response = await fetch(SummaryApi.addToCartProductCount.url, {
+        method: SummaryApi.addToCartProductCount.method,
+        credentials: "include",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCartProductCount(data?.data?.count || 0); // Update cart count state
+      } else {
+        console.error("Failed to fetch cart product count. Status:", response.status);
+      }
+    } catch (error) {
+      console.error("Error fetching cart product count:", error);
+    }
+  };
+
+  useEffect(() => {
+    const initializeApp = async () => {
+      await Promise.all([fetchUserDetails(), fetchUserAddToCart()]);
+      setIsLoading(false); // Ensure `isLoading` is set to false
+    };
+  
+    initializeApp();
+  }, );
+  
+
+  if (isLoading) {
+    // Show a loading spinner while initializing
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+      </div>
+    );
   }
 
-  const fetchUserAddToCart = async()=>{
-    const dataResponse = await fetch(SummaryApi.addToCartProductCount.url,{
-      method : SummaryApi.addToCartProductCount.method,
-      credentials : 'include'
-    })
-
-    const dataApi = await dataResponse.json()
-
-    setCartProductCount(dataApi?.data?.count)
-  }
-
-  useEffect(()=>{
-    /**user Details */
-    fetchUserDetails()
-    /**user Details add to CArt */
-    fetchUserAddToCart()
-
-
-  },[])
   return (
-    <>
-      <Context.Provider value={{
-        fetchUserDetails, // user detail fetch
-        cartProductCount, // current user add to cart product count
-        fetchUserAddToCart
-      }}>
-        
-
-        <Header />
-        <main className="min-h-[calc(100vh-120px)] pt-16">
-          <Outlet />
-        </main>
-        <Footer />
-      </Context.Provider>
-    </>
+    <Context.Provider
+      value={{
+        fetchUserDetails,
+        cartProductCount,
+        fetchUserAddToCart,
+      }}
+    >
+      {/* Responsive Navigation Header */}
+      <Header />
+      <main className="min-h-[calc(100vh-120px)] pt-16">
+        <Outlet />
+      </main>
+      <Footer />
+    </Context.Provider>
   );
 }
 

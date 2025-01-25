@@ -1,129 +1,160 @@
-import React, {useContext, useState} from 'react'
-import loginicons from './pfpik.gif'
-import { Link, useNavigate } from 'react-router-dom';
-import { RiEyeCloseLine } from "react-icons/ri";
-import { RiEyeCloseFill } from "react-icons/ri";
-import SummaryApi from '../common';
-import { toast } from 'react-toastify'
-import Context from '../Context';
-
+import React, { useContext, useState, useEffect } from "react";
+import loginicons from "./pfpik.gif";
+import { Link, useNavigate } from "react-router-dom";
+import SummaryApi from "../common";
+import { toast } from "react-toastify";
+import Context from "../Context";
 
 const Login = () => {
-  const [showPassword,setShowPassword] = useState(false)
-  const [data,setData] = useState({
-    email : "",
-    password : ""
-})
-const navigate = useNavigate()
-const { fetchUserDetails, fetchUserAddToCart } = useContext(Context)
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(true); // Initial loading state to check login
+  const [formSubmitting, setFormSubmitting] = useState(false); // For login form submission
+  const [data, setData] = useState({
+    email: "",
+    password: "",
+  });
+  const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
+  const { fetchUserDetails, fetchUserAddToCart, isLoggedIn } = useContext(Context); // Use `isLoggedIn` from context
 
-
-const handleOnChange = (e) =>{
-  const { name , value } = e.target
-
-
-setData((preve)=>{
-            return{
-                ...preve,
-                [name] : value
-            }
-        })
+  useEffect(() => {
+    // Redirect if already logged in
+    if (isLoggedIn) {
+      navigate("/");
+    } else {
+      setLoading(false); // Set loading to false if not logged in
     }
+  }, [isLoggedIn, navigate]);
 
-    const handleSubmit = async(e) =>{
-      e.preventDefault()
+  const handleOnChange = (e) => {
+    const { name, value } = e.target;
+    setData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
-      const dataResponse = await fetch(SummaryApi.signIn.url,{
-        method : SummaryApi.signIn.method,
-        credentials : "include",
-        headers : {
-          "content-type" : "application/json"
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setFormSubmitting(true);
+    setErrorMessage("");
+
+    try {
+      const response = await fetch(SummaryApi.signIn.url, {
+        method: SummaryApi.signIn.method,
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
         },
-        body : JSON.stringify(data)
-      })
+        body: JSON.stringify(data),
+      });
 
-      const dataApi = await dataResponse.json()
+      const result = await response.json();
 
-      if(dataApi.success){
-        toast.success(dataApi.message)        
-        navigate('/section')
-        fetchUserDetails()
-        fetchUserAddToCart()
+      if (result.success) {
+        toast.success(result.message);
+        fetchUserDetails();
+        fetchUserAddToCart();
+        navigate("/section");
+      } else {
+        setErrorMessage(result.message || "Invalid credentials. Please try again.");
+        toast.error(result.message);
       }
-
-      if(dataApi.error){
-        toast.error(dataApi.message)
-      }
-      
+    } catch (error) {
+      setErrorMessage("An unexpected error occurred. Please try again.");
+      toast.error("Something went wrong. Please try again later.");
+    } finally {
+      setFormSubmitting(false);
     }
-           
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-xl font-bold text-gray-700">Loading...</div>
+      </div>
+    );
+  }
+
   return (
-<section id='login'>
-        <div className='mx-auto container p-4'>
-
-            <div className='bg-white p-5 w-full max-w-sm mx-auto'>
-                    <div className='outline-dotted outline-purple-950 w-20 h-15 mx-auto overflow-hidden rounded-full'>
-                        <img src={loginicons} alt='login icons'/>
-                    </div>
-
-                    <form className='pt-6 flex flex-col gap-2' onSubmit={handleSubmit}>
-                        <div className='grid'>
-                            <label>Email : </label>
-                            <div className='bg-slate-100 p-2'>
-                                <input 
-                                    type='email' 
-                                    placeholder='enter your email' 
-                                    name='email'
-                                    value={data.email}
-                                    onChange={handleOnChange}
-                                    className='w-full h-full outline-none bg-transparent'/>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label>Password : </label>
-                            <div className='bg-slate-100 p-2 flex'>
-                                <input 
-                                    type= {showPassword ? "text" : "password"}
-                                    placeholder='enter your password'
-                                    value={data.password}                                    
-                                    name='password'                                    
-                                    onChange={handleOnChange}                                    
-                                    className='w-full h-full outline-none bg-transparent'/>
-                                    <div className='cursor-pointer text-lg' onClick={()=>setShowPassword((preve)=>!preve)}>
-                                      <span>
-                                      {
-                                        showPassword ? (
-                                          <RiEyeCloseLine />
-                                        )
-                                        :
-                                        (
-                                          <RiEyeCloseFill/>
-                                          
-                                        )
-                                      }                                     
-                                      
-                                       
-                                      </span>
-                                    </div>
-                                <div className='cursor-pointer text-xl'>                                    
-                                </div>
-                            </div>
-                            <Link to={'/reset'} className='block w-fit ml-auto hover:underline hover:text-red-600  text-red-600 italic'>
-                                Reset password
-                            </Link>
-                        </div>
-
-                        <button className='bg-purple-900 hover:bg-purple-900 text-white px-6 py-2 w-full max-w-[150px] rounded-full hover:scale-110 transition-all mx-auto block mt-6'>Login</button>
-
-                    </form>
-
-                    <p className='my-5'>Don't have account ? <Link to={"/sign-up"} className=' text-red-900 hover:text-red-700 hover:underline'>Sign up</Link></p>
-            </div>
-
-
+    <section
+      id="login"
+      className="min-h-screen bg-gradient-to-r from-blue-500 via-yellow-500 to-red-500 flex items-center justify-center"
+    >
+      <div className="bg-white p-6 w-full max-w-md rounded-2xl shadow-lg">
+        <div className="w-20 h-20 mx-auto overflow-hidden rounded-full bg-gray-200">
+          <img src={loginicons} alt="Login Icon" />
         </div>
+
+        <form className="pt-6 flex flex-col gap-4" onSubmit={handleSubmit}>
+          <div>
+            <label className="block text-gray-700 font-semibold">Email:</label>
+            <div className="bg-gray-100 p-2 rounded-lg">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                name="email"
+                value={data.email}
+                onChange={handleOnChange}
+                className="w-full bg-transparent outline-none"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-gray-700 font-semibold">Password:</label>
+            <div className="bg-gray-100 p-2 flex items-center rounded-lg">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                name="password"
+                value={data.password}
+                onChange={handleOnChange}
+                className="w-full bg-transparent outline-none"
+                required
+              />
+              <button
+                type="button"
+                className="ml-2 text-gray-600 hover:text-gray-800 transition"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? "🙈" : "👁️"}
+              </button>
+            </div>
+            <Link
+              to="/reset"
+              className="block text-right text-sm text-red-600 hover:underline mt-1"
+            >
+              Forgot password?
+            </Link>
+          </div>
+
+          <button
+            type="submit"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-full transition transform hover:scale-105 disabled:opacity-50"
+            disabled={formSubmitting}
+          >
+            {formSubmitting ? "Logging in..." : "Login"}
+          </button>
+        </form>
+
+        {errorMessage && (
+          <div className="mt-4 text-center text-red-600">{errorMessage}</div>
+        )}
+
+        <p className="mt-6 text-center text-gray-600">
+          Don't have an account?{" "}
+          <Link
+            to="/sign-up"
+            className="text-blue-500 hover:underline hover:text-blue-700"
+          >
+            Sign up
+          </Link>
+        </p>
+      </div>
     </section>
-  )
-}
-export default Login
+  );
+};
+
+export default Login;

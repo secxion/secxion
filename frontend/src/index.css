@@ -1,20 +1,59 @@
+/* Tailwind Base Setup */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Global Styles */
 body {
-  
+  @apply bg-gradient-to-r from-blue-500 via-yellow-500 to-red-500;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-
 }
 
+/* Code Blocks */
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+  @apply bg-gray-100 p-2 rounded-md text-sm text-gray-700;
+}
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-blue-500 rounded-lg;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-blue-700;
+}
+
+/* Utility Classes for Customization */
+.card {
+  @apply bg-white shadow-lg rounded-2xl p-4 transition-transform transform hover:scale-105;
+}
+
+.button {
+  @apply px-6 py-2 rounded-full font-semibold text-white;
+}
+.button-primary {
+  @apply bg-blue-500 hover:bg-blue-700 transition-all;
+}
+.button-secondary {
+  @apply bg-yellow-500 hover:bg-yellow-700 transition-all;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  @apply font-semibold text-gray-900 leading-tight;
+}
+p {
+  @apply text-gray-700 text-base;
+}
+a {
+  @apply text-blue-500 hover:underline hover:text-blue-700 transition-colors;
 }

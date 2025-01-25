@@ -1,3 +1,4 @@
+// index.js
 import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
 import Home from "../pages/Home";
@@ -6,83 +7,168 @@ import Reset from "../pages/Reset";
 import SignUp from "../pages/SignUp";
 import AdminPanel from "../pages/AdminPanel";
 import AllUsers from "../pages/AllUsers";
-import AllProducts from "../pages/AllProducts"; 
+import AllProducts from "../pages/AllProducts";
 import CategoryProduct from "../pages/CategoryProduct";
 import ProductDetails from "../Components/ProductDetails";
 import Cart from "../pages/Cart";
 import SearchProduct from "../pages/SearchProduct";
 import Section from "../pages/Section";
-import Homepage from "../pages/Homepage";
+import Notification from "../Components/Notification";
+import Profile from "../Components/Profile";
+import Settings from "../Components/Settings";
+import Wallet from "../Components/Wallet";
+import RedirectIfLoggedIn from "../Components/RedirectIfLoggedIn";
+import ProtectedRoute from "../Components/ProtectedRoute";
 
 
 const router = createBrowserRouter([
-   { 
-    path : '/',
-    element : <App/>,
-    children : [
+  {
+    path: '',
+    element: <App />,
+    children: [
+      // Public routes with redirect for logged-in users
       {
-         path : "",
-         element : <Login/>
+        path: "login",
+        element: (
+          <RedirectIfLoggedIn>
+            <Login />
+          </RedirectIfLoggedIn>
+        ),
       },
       {
-         path : "home",
-         element : <Home/>
+        path: "sign-up",
+        element: (
+          <RedirectIfLoggedIn>
+            <SignUp />
+          </RedirectIfLoggedIn>
+        ),
       },
-     
-        {
-            path : "section",
-            element : <Section/>
-        },
-       
-        {
-           path : "login",
-           element : <Login/> 
-        },
-        {
-           path : "reset",
-           element : <Reset/>
-        },
-        {
-           path : "sign-up",
-           element : <SignUp/>
-        },
-        {
-            path : "product-category",
-            element : <CategoryProduct/>
-            
-        },
-        {
-         path : "product/:id",
-         element : <ProductDetails/>
-         
-        },
-        {
-         path : "cart",
-         element : <Cart/>
-         
-        },
-        {
-         path : "search",
-         element : <SearchProduct/>
-         
-        },
-        {
-         path : "admin-panel",
-         element : <AdminPanel/>,
-         children : [
-            {
-               path : "all-users",
-               element : <AllUsers/>
-            },
-            {
-               path : "all-products",
-               element : <AllProducts/>
-            }
-      ]
+      {
+        path: "reset",
+        element: (
+          <RedirectIfLoggedIn>
+            <Reset />
+          </RedirectIfLoggedIn>
+        ),
       },
 
-    ]
-   }
-])
+      // Protected routes
+      {
+        path: "/",
+        element: (
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "home",
+        element: (
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "section",
+        element: (
+          <ProtectedRoute>
+            <Section />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "product-category",
+        element: (
+          <ProtectedRoute>
+            <CategoryProduct />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "product/:id",
+        element: (
+          <ProtectedRoute>
+            <ProductDetails />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "cart",
+        element: (
+          <ProtectedRoute>
+            <Cart />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "search",
+        element: (
+          <ProtectedRoute>
+            <SearchProduct />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "wallet",
+        element: (
+          <ProtectedRoute>
+            <Wallet />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "notifications",
+        element: (
+          <ProtectedRoute>
+            <Notification />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "profile",
+        element: (
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "settings",
+        element: (
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "admin-panel",
+        element: (
+          <ProtectedRoute>
+            <AdminPanel />
+          </ProtectedRoute>
+        ),
+        children: [
+          {
+            path: "all-users",
+            element: (
+              <ProtectedRoute>
+                <AllUsers />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "all-products",
+            element: (
+              <ProtectedRoute>
+                <AllProducts />
+              </ProtectedRoute>
+            ),
+          },
+        ],
+      },
+    ],
+  },
+]);
 
-export default router
+export default router;
