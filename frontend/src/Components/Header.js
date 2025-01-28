@@ -13,6 +13,7 @@ const Header = () => {
   const dispatch = useDispatch();
   const [menuDisplay, setMenuDisplay] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchPanelOpen, setSearchPanelOpen] = useState(false);
   const user = useSelector((state) => state?.user?.user);
   const context = useContext(Context);
   const navigate = useNavigate();
@@ -41,7 +42,8 @@ const Header = () => {
   const handleSearch = (e) => {
     const { value } = e.target;
     setSearch(value);
-    if (value) {
+
+    if (value.trim()) {
       navigate(`/search?q=${value}`);
     } else {
       navigate("/search");
@@ -79,7 +81,7 @@ const Header = () => {
               placeholder="Search Trade..."
               className="w-full px-3 py-2 rounded-full outline-none focus:ring-2 focus:ring-purple-700 bg-gray-100"
               onChange={handleSearch}
-              value={search}
+              value={search || ""}
             />
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer">
               <FcSearch size={22} />
@@ -162,7 +164,6 @@ const Header = () => {
             </button>
           )}
         </div>
-
         {/* Mobile Menu Toggle */}
         <button
           className="lg:hidden text-gray-700 text-2xl"
@@ -171,6 +172,44 @@ const Header = () => {
           ☰
         </button>
       </div>
+
+      {/* Floating Search Button for Mobile View */}
+      {user?._id && (
+        <button
+          className="fixed bottom-6 right-6 bg-purple-700 text-white p-4 rounded-full shadow-lg md:hidden"
+          onClick={() => setSearchPanelOpen((prev) => !prev)}
+        >
+          <FcSearch size={28} />
+        </button>
+      )}
+
+     {/* Slide-Up Search Panel */}
+{searchPanelOpen && (
+  <div
+    className="fixed bottom-0 left-0 w-full bg-white shadow-lg p-4 z-50 md:hidden transition-transform transform translate-y-0"
+  >
+    <button
+      className="absolute top-4 right-6 z-50 text-gray-700 text-2xl bg-white rounded-full p-6 shadow-md"
+      onClick={() => setSearchPanelOpen(false)}
+      aria-label="Close search panel"
+    >
+      ✕
+    </button>
+    <div className="flex items-center w-full relative mt-6">
+      <input
+        type="text"
+        placeholder="Search Trade..."
+        className="w-full px-3 py-2 rounded-full outline-none focus:ring-2 focus:ring-purple-700 bg-gray-100"
+        onChange={handleSearch}
+        value={search || ""}
+      />
+      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer">
+        <FcSearch size={22} />
+      </div>
+    </div>
+  </div>
+)}
+
 
       {/* Sidebar for Mobile View */}
       {sidebarOpen && (

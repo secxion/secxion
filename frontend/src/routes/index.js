@@ -19,6 +19,8 @@ import Settings from "../Components/Settings";
 import Wallet from "../Components/Wallet";
 import RedirectIfLoggedIn from "../Components/RedirectIfLoggedIn";
 import ProtectedRoute from "../Components/ProtectedRoute";
+import UserUploadMarket from "../Components/UserUploadMarket";
+import UserMarket from "../pages/UserMarket";
 
 
 const router = createBrowserRouter([
@@ -74,6 +76,22 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Section />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "userMarketUpload",
+        element: (
+          <ProtectedRoute>
+            <UserUploadMarket />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "record",
+        element: (
+          <ProtectedRoute>
+            <UserMarket />
           </ProtectedRoute>
         ),
       },

@@ -22,6 +22,8 @@ const updateAddToCartProduct = require('../controller/user/updateAddToCartProduc
 const deleteAddToCartProduct = require('../controller/user/deleteAddToCartProduct')
 const SearchProduct = require('../controller/product/searchProduct')
 const filterProductController = require('../controller/product/filterProduct')
+const UserUploadMarketController = require('../controller/product/userUploadMarket')
+const getMarketController = require('../controller/product/getUserMarket')
 
 
 
@@ -50,5 +52,11 @@ router.get("/countAddToCartProduct",authToken, countAddToCartProduct)
 router.get("/view-card-product",authToken,addToCartViewProduct)
 router.post("/update-cart-product",authToken,updateAddToCartProduct)
 router.post("/delete-cart-product",authToken,deleteAddToCartProduct)
+
+//user market
+router.post("/upload-market",authToken,UserUploadMarketController)
+router.get("/get-market",getMarketController)
+
+
 
 module.exports = router

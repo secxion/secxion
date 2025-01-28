@@ -4,9 +4,8 @@ import CategoryProduct from './CategoryProduct'
 
 const Section = () => {
   return (
-    <div>
+    <div className='sticky '>
        <CategoryProduct/>
-
     </div>             
   
   )

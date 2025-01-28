@@ -1,30 +1,48 @@
-const productModel = require("../../models/productModel")
-const uploadProductPermission = require("../../helpers/permission")
+const productModel = require("../../models/productModel");
+const uploadProductPermission = require("../../helpers/permission");
 
-async function updateProductController(req,res){
-    try{
-        if(!uploadProductPermission(req.userId)){
-            throw new Error("Permission denied")
-        }
-
-        const { _id, ...resBody} = req.body
-
-        const updateProduct = await productModel.findByIdAndUpdate(_id,resBody)
-        
-        res.json({ 
-            message : "update succefully",   
-            data : updateProduct,
-            success : true,
-            error : false
-            
-})
-    }catch(err){
-        res.status(400).json({
-            message : err.message || err,
-            error : true,
-            success : false
-        })
+async function updateProductController(req, res) {
+  try {
+    if (!uploadProductPermission(req.userId)) {
+      throw new Error("Permission denied");
     }
+
+    const { _id, ...resBody } = req.body;
+
+    if (!_id) {
+      throw new Error("Product ID (_id) is required");
+    }
+
+    // Update product and return the updated document
+    const updatedProduct = await productModel.findByIdAndUpdate(
+      _id,
+      resBody,
+      { new: true, runValidators: true } // Ensure updated document is returned and validations are run
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({
+        message: "Product not found",
+        data: null,
+        success: false,
+        error: true,
+      });
+    }
+
+    res.json({
+      message: "Update successfully",
+      data: updatedProduct,
+      success: true,
+      error: false,
+    });
+  } catch (err) {
+    console.error("Error updating product:", err);
+    res.status(400).json({
+      message: err.message || err,
+      error: true,
+      success: false,
+    });
+  }
 }
 
-module.exports = updateProductController
+module.exports = updateProductController;

@@ -28,7 +28,7 @@ const SummaryApi = {
     uploadProduct : {
         url : `${backendDomain}/api/upload-product`,
         method : 'post'
-    },
+    },    
     allProduct : {
         url : `${backendDomain}/api/get-product`,
         method : 'get'
@@ -36,6 +36,14 @@ const SummaryApi = {
     updateProduct : {
         url : `${backendDomain}/api/update-product`,
         method : 'post'
+    },
+    userMarket : {
+        url : `${backendDomain}/api/upload-market`,
+        method : 'post'
+    },
+    myMarket : {
+        url : `${backendDomain}/api/get-market`,
+        method : 'get'
     },
     categoryProduct : {
         url : `${backendDomain}/api/get-categoryProduct`,

@@ -1,162 +1,136 @@
-import React, { useEffect, useState } from 'react'
-import { useLocation, useNavigate, } from 'react-router-dom'
-import productCategory from '../helpers/productCategory'
-import VerticalCard from '../Components/VerticalCard'
-import SummaryApi from '../common'
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import productCategory from "../helpers/productCategory";
+import SummaryApi from "../common";
+import { motion } from "framer-motion";
+import { FaCreditCard, FaGift, FaPaypal } from "react-icons/fa";
+import VerticalCard from "../Components/VerticalCard";
 
 const CategoryProduct = () => {
-    const [data, setData] = useState([])
-    const [loading, setLoading] = useState(false)
-    const location = useLocation()
-    const navigate = useNavigate()
-    const urlSearch = new URLSearchParams(location.search)
-    const urlCategoryListinArray = urlSearch.getAll("category")
+  const [data, setData] = useState([]); // Stores product data
+  const [loading, setLoading] = useState(false); // Loading state
+  const [sortBy, setSortBy] = useState(""); // Sorting option
+  const location = useLocation();
+  const navigate = useNavigate();
 
-    const urlCategoryListObject = {}
-    urlCategoryListinArray.forEach(el =>{
-      urlCategoryListObject[el] = true
-    })
+  // Parse URL parameters for categories
+  const urlSearch = new URLSearchParams(location.search);
+  const urlCategoryListinArray = urlSearch.getAll("category");
 
+  const urlCategoryListObject = {};
+  urlCategoryListinArray.forEach((el) => {
+    urlCategoryListObject[el] = true;
+  });
 
-    const [selectCategory, setSelectCategory] = useState(urlCategoryListObject)
-    const [filterCategoryList, setFilterCategoryList] = useState([])
+  const [selectCategory, setSelectCategory] = useState(urlCategoryListObject);
+  const [filterCategoryList, setFilterCategoryList] = useState([]);
 
-    const [sortBy, setSortBy] = useState("")
-
-    const fetchData = async()=>{
-      const response = await fetch(SummaryApi.filterProduct.url,{
-        method : SummaryApi.filterProduct.method,
-        headers : {
-          "content-type" : "application/json" 
+  // Fetch data from the API
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(SummaryApi.filterProduct.url, {
+        method: SummaryApi.filterProduct.method,
+        headers: {
+          "content-type": "application/json",
         },
-        body : JSON.stringify({
-          category : filterCategoryList
-        })
-      })
+        body: JSON.stringify({ category: filterCategoryList }),
+      });
 
-      const dataResponse = await response.json()
-
-      setData(dataResponse?.data || [])
+      const dataResponse = await response.json();
+      setData(dataResponse?.data || []); // Fallback to an empty array
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const handleSelectCategory = (e) =>{
-      const {name, value, checked} = e.target
+  // Update selected categories
+  const handleSelectCategory = (e) => {
+    const { value, checked } = e.target;
+    setSelectCategory((prev) => ({
+      ...prev,
+      [value]: checked,
+    }));
+  };
 
-      setSelectCategory((preve)=>{
-        return{
-          ...preve,
-          [value] : checked
-        }
-      })
+  // Fetch data when filterCategoryList changes
+  useEffect(() => {
+    fetchData();
+  }, [filterCategoryList]);
 
-    }
+  // Update category filters and URL when selection changes
+  useEffect(() => {
+    const arrayOfCategory = Object.keys(selectCategory).filter(
+      (key) => selectCategory[key]
+    );
+    setFilterCategoryList(arrayOfCategory);
 
-    useEffect(()=>{
-      fetchData()
-    },[filterCategoryList])
-
-    useEffect(()=>{
-      const arrayOfCategory = Object.keys(selectCategory).map(categoryKeyName =>{
-        if(selectCategory[categoryKeyName]){
-          return categoryKeyName
-        }
-        return null
-      }).filter(el => el)
-
-      setFilterCategoryList(arrayOfCategory)
-
-      // format for url change when change on the checkbox
-      const urlFormat = arrayOfCategory.map((el, index) => {
-        if((arrayOfCategory.length - 1) === index ){
-          return `${el}`
-        }
-        return `${el}&`
-      })
-
-      navigate("/product-category?"+urlFormat.join(""))
-    },[selectCategory])
-
-    const handleOnchangeSortBy = (e)=>{
-      const { value } = e.target
-
-      setSortBy(value)
-
-      if(value === 'asc'){
-        setData(preve => preve.sort((a,b)=>a.sellingPrice - b.sellingPrice))
-      }
-
-      if(value === 'dsc'){
-        setData(preve => preve.sort((a,b)=>b.sellingPrice - a.sellingPrice))
-      }
-    }
-
-    useEffect(()=>{
-      
-    },[sortBy])
-    
+    const queryParams = arrayOfCategory.map((cat) => `category=${cat}`).join("&");
+    navigate(`/product-category?${queryParams}`);
+  }, [selectCategory]);
 
   return (
-    <div className='container mx-auto p-4'>
+    <div className="container mx-auto px-4 py-6">
+      <div className="grid lg:grid-cols-[300px,1fr] gap-8">
+        {/* Sidebar */}
+        <motion.div
+          initial={{ x: -50, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          className="bg-gradient-to-br from-blue-100 via-white to-blue-50 p-6 rounded-lg shadow-lg sticky top-6 z-20 overflow-y-auto max-h-[calc(100vh-120px)]"
+        >
+          <h3 className="text-lg font-bold text-blue-800 mb-4"> <br/> </h3>
+          <h3 className="text-lg font-bold text-blue-800 mb-4">Market Categories</h3>
+          <div className="mb-6">
+            <h4 className="text-base font-medium text-gray-700 mb-2">Sort by</h4>
+            
+          </div>
+          <form className="space-y-4">
+            {productCategory.map((category) => (
+              <label
+                key={category.id}
+                className="flex items-center gap-3 p-2 hover:bg-blue-100 rounded-lg cursor-pointer transition"
+              >
+                {category.value === "gift cards" && (
+                  <FaGift className="text-blue-600 w-5 h-5" />
+                )}
+                {category.value === "visa / creditcards" && (
+                  <FaCreditCard className="text-blue-600 w-5 h-5" />
+                )}
+                {category.value === "Online Payments" && (
+                  <FaPaypal className="text-blue-600 w-5 h-5" />
+                )}
+                <input
+                  type="checkbox"
+                  name="category"
+                  checked={selectCategory[category.value]}
+                  value={category.value}
+                  onChange={handleSelectCategory}
+                  className="accent-blue-600"
+                />
+                <span className="text-slate-700">{category.label}</span>
+              </label>
+            ))}
+          </form>
+        </motion.div>
 
-      {/**desktop version */}  
-      <div className='lg:grid grid-cols-[200px,1fr]'>
-        {/**left side */}
-        <div className='bg-slate-300 p-2 min-h-[calc(40vh-55px)]'>
-            {/**sort by */}
-            <div className=''>
-                <h3 className='text-base uppercase font-medium text-slate-800 border-b pb-1 border-slate-500'>Sort by</h3>
-
-                <form className='text-sm flex flex-col gap-2 py-2'>
-                  <div className='flex items-center gap-3'>
-                    <input type='radio' name='sortBy' checked={sortBy === 'asc'} onChange={handleOnchangeSortBy} value={'asc'}/>
-                    <label>Price - Low to High</label>
-                  </div>
-
-                  <div className='flex items-center gap-3'>
-                    <input type='radio' name='sortBy' checked={sortBy === 'dsc'} onChange={handleOnchangeSortBy} value={"dsc"} />
-                    <label>Price - High to Low</label>
-                  </div>
-                </form>
-            </div>
-
-            {/**filter by */}
-            <div className=''>
-                <h3 className='text-base uppercase font-medium text-slate-800 border-b pb-1 border-slate-500'>Category</h3>
-
-                <form className='text-sm flex flex-col gap-2 py-2'>
-                  {
-                    productCategory.map((categoryName, index)=>{
-                      return(
-                        <div className='flex items-center gap-3'>
-                          <input type='checkbox' name={'category'} checked={selectCategory[categoryName?.value]} value={categoryName?.value} id={categoryName?.value} onChange={handleSelectCategory}/>
-                          <label htmlFor={categoryName.value}>{categoryName?.value}</label>
-                        </div>
-                      )
-                    })
-                  }
-                </form>
-            </div>
-
-
-        </div>
-
-        {/**right side (product) */}
-        <div className='px-4'>
-            <p className='font-medium text-slate-950 text-lg my-2'>Results : {data.length}</p>
-
-        <div className='min-h-[calc(100vh-120px)]  max-h-[calc(50vh-60px)]'>
-          {
-            data.length !== 0 && (
-              <VerticalCard data={data} loading={loading}/>
-            )
-          }
-        </div>
-
-        </div>
+        {/* Product Grid */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex-1 overflow-y-auto"
+        >
+          <p className="text-lg font-medium mb-4">
+            Search Results: {data.length}
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <VerticalCard data={data} loading={loading} />
+          </div>
+        </motion.div>
       </div>
+    </div>
+  );
+};
 
-      </div>    
-  )
-}
-
-export default CategoryProduct
+export default CategoryProduct;

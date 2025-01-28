@@ -20,7 +20,7 @@ const Login = () => {
   useEffect(() => {
     // Redirect if already logged in
     if (isLoggedIn) {
-      navigate("/");
+      navigate("home");
     } else {
       setLoading(false); // Set loading to false if not logged in
     }
@@ -55,7 +55,7 @@ const Login = () => {
         toast.success(result.message);
         fetchUserDetails();
         fetchUserAddToCart();
-        navigate("/section");
+        navigate("/");
       } else {
         setErrorMessage(result.message || "Invalid credentials. Please try again.");
         toast.error(result.message);
