@@ -98,13 +98,11 @@ const ProductDetails = () => {
     <div className='container mx-auto p-4'>
 
       <div className='min-h-[200px] flex flex-col lg:flex-row gap-4'>
-          {/***product Image */}
           <div className='h-96 flex flex-col lg:flex-row-reverse gap-4'>
 
               <div className='h-[300px] w-[300px] lg:h-96 lg:w-96 bg-slate-200 relative p-2'>
                   <img src={activeImage} className='h-full w-full object-scale-down mix-blend-multiply' onMouseMove={handleZoomImage} onMouseLeave={handleLeaveImageZoom}/>
 
-                    {/**product zoom */}
                     {
                       zoomImage && (
                         <div className='hidden lg:block absolute min-w-[500px] overflow-hidden min-h-[400px] bg-slate-200 p-1 -right-[510px] top-0'>
@@ -156,7 +154,6 @@ const ProductDetails = () => {
               </div>
           </div>
 
-           {/***product details */}
            {
             loading ? (
               <div className='grid gap-1 w-full'>

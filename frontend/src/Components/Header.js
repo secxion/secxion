@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useMemo } from "react";
 import { FcSearch } from "react-icons/fc";
 import { PiUserSquare } from "react-icons/pi";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -18,24 +18,31 @@ const Header = () => {
   const context = useContext(Context);
   const navigate = useNavigate();
   const searchInput = useLocation();
-  const URLSearch = new URLSearchParams(searchInput?.search);
-  const searchQuery = URLSearch.getAll("q");
+  
+  const searchQuery = useMemo(() => {
+    const URLSearch = new URLSearchParams(searchInput?.search);
+    return URLSearch.get("q") || "";
+  }, [searchInput]);
+
   const [search, setSearch] = useState(searchQuery);
 
   const handleLogout = async () => {
-    const fetchData = await fetch(SummaryApi.logout_user.url, {
-      method: SummaryApi.logout_user.method,
-      credentials: "include",
-    });
+    try {
+      const response = await fetch(SummaryApi.logout_user.url, {
+        method: SummaryApi.logout_user.method,
+        credentials: "include",
+      });
+      const data = await response.json();
 
-    const data = await fetchData.json();
-
-    if (data.success) {
-      toast.success(data.message);
-      dispatch(setUserDetails(null));
-      navigate("/login");
-    } else if (data.error) {
-      toast.error(data.message);
+      if (data.success) {
+        toast.success(data.message);
+        dispatch(setUserDetails(null));
+        navigate("/login");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error("Logout failed. Please try again.");
     }
   };
 
@@ -53,24 +60,26 @@ const Header = () => {
   return (
     <nav className="h-14 shadow-md bg-gray-200 fixed w-full z-50">
       <div className="h-full container mx-auto flex items-center justify-between px-4">
-        {/* Unique Home Icon */}
+        {/* Home Icon */}
         <div className="flex items-center flex-shrink-0">
-          <Link to="/">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-10 w-10 md:h-12 md:w-12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M3 9.5L12 3l9 6.5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-11z" fill="#8B5CF6" />
-              <rect x="10" y="14" width="4" height="6" fill="#FACC15" />
-              <path d="M3 9.5L12 3l9 6.5" stroke="#8B5CF6" strokeWidth="2" />
-            </svg>
-          </Link>
+          {user?._id && (
+            <Link to="/">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-10 w-10 md:h-12 md:w-12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M3 9.5L12 3l9 6.5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-11z" fill="#4F46E5" />
+                <rect x="10" y="14" width="4" height="6" fill="#FBBF24" />
+                <path d="M3 9.5L12 3l9 6.5" stroke="#4F46E5" strokeWidth="2" />
+              </svg>
+            </Link>
+          )}
         </div>
 
         {/* Search Bar for Desktop */}
@@ -79,9 +88,9 @@ const Header = () => {
             <input
               type="text"
               placeholder="Search Trade..."
-              className="w-full px-3 py-2 rounded-full outline-none focus:ring-2 focus:ring-purple-700 bg-gray-100"
+              className="w-full px-3 py-2 rounded-full outline-none focus:ring-2 focus:ring-blue-700 bg-gray-100"
               onChange={handleSearch}
-              value={search || ""}
+              value={search}
             />
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer">
               <FcSearch size={22} />
@@ -105,7 +114,7 @@ const Header = () => {
                     alt="Profile"
                   />
                 ) : (
-                  <PiUserSquare size={36} className="text-purple-700" />
+                  <PiUserSquare size={36} className="text-blue-700" />
                 )}
               </div>
 
@@ -129,7 +138,10 @@ const Header = () => {
                     My Profile
                   </Link>
                   <button
-                    onClick={handleLogout}
+                    onClick={() => {
+                      handleLogout();
+                      setMenuDisplay(false);
+                    }}
                     className="w-full text-left px-4 py-2 hover:bg-gray-100"
                   >
                     Logout
@@ -145,13 +157,14 @@ const Header = () => {
               onClick={handleLogout}
               className="hidden md:flex items-center justify-center bg-transparent group"
               title="Logout"
+              aria-label="Logout"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="w-10 h-10"
                 viewBox="0 0 24 24"
               >
-                <circle cx="12" cy="12" r="10" fill="#000" />
+                <circle cx="12" cy="12" r="10" fill="#1E293B" />
                 <path
                   d="M8 12h8m-3-3l3 3-3 3"
                   stroke="#F43F5E"
@@ -164,72 +177,88 @@ const Header = () => {
             </button>
           )}
         </div>
+
         {/* Mobile Menu Toggle */}
-        <button
-          className="lg:hidden text-gray-700 text-2xl"
-          onClick={() => setSidebarOpen(true)}
-        >
-          ☰
-        </button>
+        {user?._id && (
+          <button
+            className="lg:hidden text-gray-700 text-2xl"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open menu"
+          >
+            ☰
+          </button>
+        )}
       </div>
 
       {/* Floating Search Button for Mobile View */}
       {user?._id && (
         <button
-          className="fixed bottom-6 right-6 bg-purple-700 text-white p-4 rounded-full shadow-lg md:hidden"
+          className="fixed bottom-6 right-6 bg-blue-700 text-white p-4 rounded-full shadow-lg md:hidden"
           onClick={() => setSearchPanelOpen((prev) => !prev)}
+          aria-label="Toggle search panel"
         >
           <FcSearch size={28} />
         </button>
       )}
 
-     {/* Slide-Up Search Panel */}
-{searchPanelOpen && (
-  <div
-    className="fixed bottom-0 left-0 w-full bg-white shadow-lg p-4 z-50 md:hidden transition-transform transform translate-y-0"
-  >
-    <button
-      className="absolute top-4 right-6 z-50 text-gray-700 text-2xl bg-white rounded-full p-6 shadow-md"
-      onClick={() => setSearchPanelOpen(false)}
-      aria-label="Close search panel"
-    >
-      ✕
-    </button>
-    <div className="flex items-center w-full relative mt-6">
-      <input
-        type="text"
-        placeholder="Search Trade..."
-        className="w-full px-3 py-2 rounded-full outline-none focus:ring-2 focus:ring-purple-700 bg-gray-100"
-        onChange={handleSearch}
-        value={search || ""}
-      />
-      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer">
-        <FcSearch size={22} />
-      </div>
-    </div>
-  </div>
-)}
-
+      {/* Slide-Up Search Panel */}
+      {searchPanelOpen && (
+        <div
+          className="fixed bottom-0 left-0 w-full bg-white shadow-lg p-4 z-50 md:hidden transition-transform transform translate-y-0"
+        >
+          <button
+            className="absolute top-4 right-6 z-50 text-gray-700 text-2xl bg-white rounded-full p-6 shadow-md"
+            onClick={() => setSearchPanelOpen(false)}
+            aria-label="Close search panel"
+          >
+            ✕
+          </button>
+          <div className="flex items-center w-full relative mt-6">
+            <input
+              type="text"
+              placeholder="Search Trade..."
+              className="w-full px-3 py-2 rounded-full outline-none focus:ring-2 focus:ring-blue-700 bg-gray-100"
+              onChange={handleSearch}
+              value={search}
+            />
+            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer">
+              <FcSearch size={22} />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Sidebar for Mobile View */}
-      {sidebarOpen && (
+      {sidebarOpen && user?._id && (
         <div className="fixed top-0 left-0 w-3/4 h-full bg-gray-200 z-50">
           <div className="p-4">
             <button
               onClick={() => setSidebarOpen(false)}
               className="text-gray-700 text-2xl"
+              aria-label="Close menu"
             >
               ✕
             </button>
             <nav className="mt-4">
-              <Link to="/home" className="block text-gray-700 py-2">
+              <Link
+                to="/home"
+                className="block text-gray-700 py-2"
+                onClick={() => setSidebarOpen(false)}
+              >
                 Home
               </Link>
-              <Link to="/cart" className="block text-gray-700 py-2">
+              <Link
+                to="/cart"
+                className="block text-gray-700 py-2"
+                onClick={() => setSidebarOpen(false)}
+              >
                 Cart
               </Link>
               <button
-                onClick={handleLogout}
+                onClick={() => {
+                  handleLogout();
+                  setSidebarOpen(false);
+                }}
                 className="block text-gray-700 py-2 text-left w-full"
               >
                 Logout

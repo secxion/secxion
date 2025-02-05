@@ -1,27 +1,40 @@
-import React from 'react';
-import displayUSDCurrency from '../helpers/displayCurrency';
+import React, { useState } from "react";
+import HistoryDetailView from './HistoryDetailView';
 
-const HistoryCard = ({ data, fetchdata }) => {
+const HistoryCard = ({ data }) => {
+  const [showDetailView, setShowDetailView] = useState(false);
+  
+  const handleViewMore = () => {
+    setShowDetailView(true);
+  };
+
   return (
-    <div className='bg-white p-4 rounded '>
-      <div className='w-40'>
-        <div className='w-32 h-32 flex justify-center items-center'>
-          {data?.Image?.[0] ? (
-            <img
-              src={data.Image[0]}
-              alt='Product'
-              className='mx-auto object-fill h-full'
-            />
-          ) : (
-            <p className='text-gray-500'>No Image Available</p>
-          )}
-        </div>
-        <h1 className='text-ellipsis line-clamp-2'>{data.totalAmount}</h1>
-        <div>
-          <p className='font-semibold'>{displayUSDCurrency(data.description)}</p>
+    <>
+      <div className='bg-white p-4 rounded shadow-md'>
+        <div className='w-full'>
+          <p className="text-gray-600 mt-1">
+            Market ID: <span className='truncate block'>{data._id}</span>
+          </p>
+          <p className="text-gray-500 text-sm mt-2">
+            CreatedAt: <span className='truncate block'>{data.timestamp ? new Date(data.timestamp).toLocaleString() : "N/A"}</span>
+          </p>
+          <button 
+            onClick={handleViewMore} 
+            className="mt-4 bg-blue-500 text-white p-2 rounded hover:bg-blue-600 w-full">
+            View More
+          </button>
         </div>
       </div>
-    </div>
+
+      {showDetailView && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <HistoryDetailView
+            productDetails={data}
+            onClose={() => setShowDetailView(false)}
+          />
+        </div>
+      )}
+    </>
   );
 };
 

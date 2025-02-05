@@ -37,6 +37,10 @@ const SummaryApi = {
         url : `${backendDomain}/api/update-product`,
         method : 'post'
     },
+    marketRecord : {
+        url : `${backendDomain}/api/market-record`,
+        method : 'post'
+    },
     userMarket : {
         url : `${backendDomain}/api/upload-market`,
         method : 'post'

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CgClose } from "react-icons/cg";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import uploadImage from '../helpers/uploadImage';
@@ -15,9 +15,37 @@ const UserUploadMarket = ({
   const [data, setData] = useState({
     Image: [],
     totalAmount: "",
-    description: "",
+    userRemark: "",
+    productImage: productDetails.productImage || "",
+    productName: productDetails.productName || "",
+    brandName: productDetails.brandName || "",
+    category: productDetails.category || "",
+    description: productDetails.description || "",
+    pricing: Array.isArray(productDetails.pricing) ? productDetails.pricing : [], // Ensure it's always an array
   });
 
+  useEffect(() => {
+    console.log("Received productDetails:", productDetails);
+  
+    setData((prevData) => ({
+      ...prevData,
+      productImage: productDetails.productImage || "",
+      productName: productDetails.productName || "",
+      brandName: productDetails.brandName || "",
+      category: productDetails.category || "",
+      description: productDetails.description || "",
+      pricing: productDetails.currency && productDetails.faceValue && productDetails.rate
+        ? [{
+            currency: productDetails.currency,
+            faceValues: [{
+              faceValue: productDetails.faceValue,
+              sellingPrice: productDetails.rate
+            }]
+          }]
+        : [],
+    }));
+  }, [productDetails]);
+  
   const [openFullScreenImage, setOpenFullScreenImage] = useState(false);
   const [fullScreenImage, setFullScreenImage] = useState("");
 
@@ -51,7 +79,14 @@ const UserUploadMarket = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
+    if (!data.pricing || data.pricing.length === 0) {
+      toast.error("Please add at least one pricing entry.");
+      return;
+    }
+  
+    console.log("Submitting data:", JSON.stringify(data, null, 2));
+  
     const response = await fetch(SummaryApi.userMarket.url, {
       method: SummaryApi.userMarket.method,
       credentials: 'include',
@@ -60,63 +95,59 @@ const UserUploadMarket = ({
       },
       body: JSON.stringify(data),
     });
-
+  
     const responseData = await response.json();
-
+    console.log("Response from server:", responseData);
+  
     if (responseData.success) {
       toast.success(responseData.message);
       onClose();
       fetchData();
-    } else if (responseData.error) {
+    } else {
       toast.error(responseData.message);
     }
   };
 
   return (
-    <div className='fixed w-full h-full bg-gray-800 bg-opacity-50 top-0 left-0 right-0 bottom-0 flex justify-center items-center pt-16'>
-      <div className='bg-white p-6 rounded-xl w-full max-w-2xl overflow-y-auto shadow-lg' style={{ maxHeight: '90vh' }}>
-        {/* Header Section */}
+    <div className='fixed w-full h-full bg-gray-800 bg-opacity-50 top-0 left-0 flex justify-center items-center pt-16'>
+      <div className='bg-white p-6 rounded-2xl w-full max-w-2xl shadow-lg transition-transform transform scale-95 hover:scale-100 duration-300' style={{ maxHeight: '90vh', overflowY: 'auto' }}>
         <div className='flex justify-between items-center mb-6'>
-          <h2 className='font-bold text-lg text-gray-700'>Upload Product</h2>
+          <h2 className='font-extrabold text-2xl text-gray-800'>Upload Product</h2>
           <div
-            className='w-fit ml-auto text-2xl hover:text-red-600 cursor-pointer'
+            className='text-2xl text-gray-500 hover:text-red-600 cursor-pointer'
             onClick={onClose}
           >
             <CgClose />
           </div>
         </div>
 
-        {/* Product Details Section */}
         {productDetails && (
-          <div className='border rounded-lg p-4 bg-gray-100 mb-6'>
+          <div className='border rounded-lg p-4 bg-gray-50 shadow-inner mb-6'>
             <div className='flex items-center gap-4'>
               <img
                 src={productDetails.productImage || ''}
                 alt='Product'
-                className='w-20 h-20 object-cover rounded-lg'
+                className='w-24 h-24 object-cover rounded-lg border'
               />
               <div>
-                <h3 className='font-bold text-gray-700 text-lg'>{productDetails.productName}</h3>
-                <p className='text-gray-500'>Rate: {productDetails.rate}</p>
-                <p className='text-gray-500'>Price: {productDetails.sellingPrice}</p>
+                <h3 className='font-bold text-gray-800 text-lg'>{productDetails.productName}</h3>
+                <p className='text-gray-600'>Currency: {productDetails.currency}</p>
+                <p className='text-gray-600'>FaceValue: {productDetails.faceValue}</p>
+                <p className='text-gray-600'>Rate: {productDetails.rate}</p>
+
               </div>
             </div>
             <p className='text-gray-600 mt-4'>{productDetails.description}</p>
           </div>
         )}
 
-        {/* Upload Form Section */}
-        <form
-          className='grid gap-4'
-          onSubmit={handleSubmit}
-        >
-          {/* Image Upload */}
+        <form className='space-y-6' onSubmit={handleSubmit}>
           <div>
-            <label htmlFor='Image' className='font-medium text-gray-700'>Images:</label>
+            <label htmlFor='Image' className='block font-medium text-gray-700 mb-2'>Images:</label>
             <label htmlFor='uploadImageInput'>
-              <div className='p-4 border rounded-lg bg-gray-50 flex justify-center items-center cursor-pointer hover:bg-gray-100'>
+              <div className='p-4 border rounded-lg bg-gray-50 flex justify-center items-center cursor-pointer hover:bg-gray-100 shadow-md'>
                 <div className='text-gray-500 flex flex-col items-center'>
-                  <FaCloudUploadAlt className='text-3xl' />
+                  <FaCloudUploadAlt className='text-5xl text-blue-500' />
                   <p className='text-sm'>Upload Product Image</p>
                 </div>
               </div>
@@ -127,21 +158,21 @@ const UserUploadMarket = ({
                 onChange={handleUploadImage}
               />
             </label>
-            <div className='flex gap-2 mt-4'>
+            <div className='flex gap-2 mt-4 flex-wrap'>
               {data?.Image.length > 0 ? (
                 data.Image.map((el, index) => (
                   <div className='relative group' key={index}>
                     <img
                       src={el}
                       alt={`product-${index}`}
-                      className='w-20 h-20 object-cover rounded-lg border cursor-pointer'
+                      className='w-20 h-20 object-cover rounded-lg border cursor-pointer hover:scale-105 transition-transform duration-200'
                       onClick={() => {
                         setOpenFullScreenImage(true);
                         setFullScreenImage(el);
                       }}
                     />
                     <div
-                      className='absolute bottom-1 right-1 p-1 bg-red-600 text-white rounded-full hidden group-hover:block cursor-pointer'
+                      className='absolute top-1 right-1 p-1 bg-red-600 text-white rounded-full hidden group-hover:block cursor-pointer'
                       onClick={() => handleDeleteImage(index)}
                     >
                       <MdDelete />
@@ -153,47 +184,34 @@ const UserUploadMarket = ({
               )}
             </div>
           </div>
-
-          {/* Total Amount */}
           <div>
-            <label htmlFor='totalAmount' className='font-medium text-gray-700'>Total Amount:</label>
+            <label htmlFor='totalAmount' className='block font-medium text-gray-700 mb-2'>Total Amount:</label>
             <input
               type='number'
               id='totalAmount'
               name='totalAmount'
               value={data.totalAmount}
               onChange={handleOnChange}
-              placeholder='Enter total amount'
-              className='w-full p-2 border rounded-lg bg-gray-50 focus:outline-none focus:ring focus:ring-yellow-300'
+              className='w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring focus:ring-blue-300 shadow-sm'
               required
             />
           </div>
-
-          {/* Remarks */}
           <div>
-            <label htmlFor='description' className='font-medium text-gray-700'>Remarks:</label>
+            <label htmlFor='userRemark' className='block font-medium text-gray-700 mb-2'>Remarks:</label>
             <textarea
-              id='description'
-              name='description'
-              value={data.description}
+              id='userRemark'
+              name='userRemark'
+              value={data.userRemark}
               onChange={handleOnChange}
-              placeholder='Enter product description'
               rows={4}
-              className='w-full p-2 border rounded-lg bg-gray-50 focus:outline-none focus:ring focus:ring-yellow-300'
+              className='w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring focus:ring-blue-300 shadow-sm'
             ></textarea>
           </div>
-
-          {/* Submit Button */}
-          <button
-            type='submit'
-            className='w-full py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700'
-          >
-            Upload Product
+          <button className="mt-5 w-full bg-emerald-600 text-white p-3 rounded-lg font-semibold hover:bg-emerald-700 shadow-lg hover:shadow-xl transition duration-300">
+            Submit
           </button>
         </form>
       </div>
-
-      {/* Fullscreen Image Display */}
       {openFullScreenImage && (
         <DisplayImage
           onClose={() => setOpenFullScreenImage(false)}

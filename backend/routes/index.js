@@ -24,10 +24,12 @@ const SearchProduct = require('../controller/product/searchProduct')
 const filterProductController = require('../controller/product/filterProduct')
 const UserUploadMarketController = require('../controller/product/userUploadMarket')
 const getMarketController = require('../controller/product/getUserMarket')
+const marketRecordController = require('../controller/product/marketRecord')
+const { validateFilterProducts } = require('../middleware/validators')
 
 
 
-router.post("/signup",userSignUpController)
+router.post("/signup", userSignUpController)
 router.post("/signin",userSignInController)
 router.get("/user-details",authToken,userDetailsController)
 router.get("/userLogout",userLogout)
@@ -44,7 +46,7 @@ router.get("/get-categoryProduct",getCategoryProduct)
 router.post("/category-product",getCategoryWiseProduct)
 router.post("/product-details",getProductDetails)
 router.get("/search",SearchProduct)
-router.post("/filter-product",filterProductController)
+router.post("/filter-product", filterProductController)
 
 //user add to cart
 router.post("/addtocart", authToken, addToCartController)
@@ -56,6 +58,8 @@ router.post("/delete-cart-product",authToken,deleteAddToCartProduct)
 //user market
 router.post("/upload-market",authToken,UserUploadMarketController)
 router.get("/get-market",getMarketController)
+router.post("/market-record",authToken,marketRecordController)
+
 
 
 

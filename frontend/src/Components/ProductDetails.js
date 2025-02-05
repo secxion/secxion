@@ -1,12 +1,8 @@
-import React, {  useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import SummaryApi from "../common";
-import { FaStar } from "react-icons/fa";
-import { FaStarHalf } from "react-icons/fa";
-import { PiDotsNine } from "react-icons/pi";
-
-import displayUSDCurrency from "../helpers/displayCurrency";
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import UserUploadMarket from "./UserUploadMarket";
+import SummaryApi from "../common";
+import currencyFullNames from "../helpers/currencyFullNames";
 
 const ProductDetails = () => {
   const [data, setData] = useState({
@@ -15,171 +11,143 @@ const ProductDetails = () => {
     category: "",
     productImage: [],
     description: "",
-    facevalue: "",
-    sellingPrice: "",
+    pricing: [],
   });
+  const [loading, setLoading] = useState(true);
+  const [showUploadForm, setShowUploadForm] = useState(false);
+  const [activeCurrency, setActiveCurrency] = useState(null);
+  const [selectedFaceValue, setSelectedFaceValue] = useState(null);
+  const [error, setError] = useState(null);
 
   const params = useParams();
-  const [loading, setLoading] = useState(true);
-  const productImageListLoading = new Array(4).fill(null);
-  const [activeImage, setActiveImage] = useState("");
-  const [showUploadForm, setShowUploadForm] = useState(false);
-
-
-  const navigate = useNavigate();
-
-  const fetchProductDetails = async () => {
-    setLoading(true);
-    const response = await fetch(SummaryApi.productDetails.url, {
-      method: SummaryApi.productDetails.method,
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        productId: params?.id,
-      }),
-    });
-    setLoading(false);
-    const dataResponse = await response.json();
-
-    setData(dataResponse?.data);
-    setActiveImage(dataResponse?.data.productImage[0]);
-  };
-
-  console.log("data", data);
 
   useEffect(() => {
-    fetchProductDetails();
-  }, [params]);
+    if (!params?.id) return;
 
-  const handleMouseEnterProduct = (imageURL) => {
-    setActiveImage(imageURL);
+    const fetchProductDetails = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(SummaryApi.productDetails.url, {
+          method: SummaryApi.productDetails.method,
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            productId: params.id,
+          }),
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch product details");
+
+        const dataResponse = await response.json();
+        setData(dataResponse?.data);
+        setActiveCurrency(dataResponse?.data?.pricing?.[0] || null);
+      } catch (error) {
+        console.error("Error fetching product details:", error);
+        setError("Failed to fetch product details. Please try again later.");
+      }
+      setLoading(false);
+    };
+
+    fetchProductDetails();
+  }, [params?.id]);
+
+  const handleCurrencyChange = (currency) => {
+    const selectedCurrency = data.pricing.find(item => item.currency === currency);
+    setActiveCurrency(selectedCurrency);
+    setSelectedFaceValue(null);
   };
 
-  const handleSell = () => {
+  const handleSell = (faceValue) => {
+    setSelectedFaceValue(faceValue);
     setShowUploadForm(true);
   };
 
   return (
     <>
-      <div>ProductDetails.js</div>
+      <div className="container mx-auto p-8 rounded-xl shadow-2xl bg-gradient-to-br from-blue-900 to-gray-800 text-white">
+        <div className="flex flex-col lg:flex-row gap-8 overflow-hidden">
+          <div className="flex-1">
+            {loading ? (
+              <div className="animate-pulse flex flex-col gap-4">
+                <p className="bg-slate-200 h-6 rounded-full w-1/2"></p>
+                <h2 className="bg-slate-200 h-8 rounded-full w-3/4"> </h2>
+                <p className="bg-slate-200 h-6 rounded-full w-1/3"></p>
+              </div>
+            ) : error ? (
+              <p className="text-red-500">{error}</p>
+            ) : (
+              <>
+                <p className="bg-emerald-400 text-black px-4 py-2 rounded-full w-fit">{data?.brandName}</p>
+                <h2 className="text-3xl font-semibold">{data?.productName}</h2>
+                <p className="text-lg text-gray-300">{data?.category}</p>
 
-      <div className="container mx-auto p-4">
-        <div className="min-h-[200px] flex flex-col lg:flex-row gap-4">
-          {/**product Image */}
-          <div className="h-96 flex flex-col lg:flex-row-reverse gap-4">
-            <div className="h-[300px] w-[300px] lg:h-96 lg:w-96 bg-slate-200">
-              <img
-                src={activeImage}
-                alt=""
-                className="h-full w-full object-scale-down mix-blend-multiply"
-              />
-            </div>
-            <div className="h-full">
-              {loading ? (
-                <div className="flex gap-2 lg:flex-col overflow-scroll scrollbar-none h-full ">
-                  {productImageListLoading.map((el, index) => {
-                    return (
-                      <div
-                        className="h-20 w-20 bg-slate-200 rounded animate-pulse"
-                        key={"loadingImage" + index}
-                      ></div>
-                    );
-                  })}
+                {/* Currency Selection Section */}
+                <div className="mt-8">
+                  <div className="flex overflow-x-auto space-x-4 scrollbar-hide">
+                    {data?.pricing?.map((currency) => {
+                      const fullCurrencyName = currencyFullNames[currency.currency] || currency.currency;
+                      return (
+                        <div
+                          key={currency.currency}
+                          className={`flex-shrink-0 p-4 border rounded-lg cursor-pointer transition-transform transform hover:scale-105 ${activeCurrency?.currency === currency.currency ? 'bg-emerald-500 text-white' : 'bg-white text-gray-800'}`}
+                          onClick={() => handleCurrencyChange(currency.currency)}
+                        >
+                          <h3 className="text-lg font-semibold">{fullCurrencyName}</h3>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              ) : (
-                <div className="flex gap-2 lg:flex-col overflow-scroll scrollbar-none h-full ">
-                  {data.productImage?.map((imgURL, index) => {
-                    return (
-                      <div
-                        className="h-20 w-20 bg-slate-200 rounded p-1"
-                        key={imgURL}
-                      >
-                        <img
-                          src={imgURL}
-                          alt=""
-                          className="w-full h-full object-scale-down mix-blend-multiply"
-                          onMouseEnter={() => handleMouseEnterProduct(imgURL)}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
 
-            <div></div>
+                {/* Face Values for Selected Currency */}
+                {activeCurrency && (
+                  <div className="mt-6 max-h-[300px] overflow-y-auto">
+                    <table className="min-w-full table-auto bg-white shadow-lg rounded-lg overflow-hidden text-gray-800">
+                      <thead>
+                        <tr className="bg-gray-200">
+                          <th className="py-3 px-6 text-left text-sm font-semibold">Face Value</th>
+                          <th className="py-3 px-6 text-left text-sm font-semibold">Rate</th>
+                          <th className="py-3 px-6 text-left text-sm font-semibold">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activeCurrency?.faceValues?.map((fv, index) => (
+                          <tr key={index} className="border-b hover:bg-gray-100">
+                            <td className="py-3 px-6">{fv.faceValue}</td>
+                            <td className="py-3 px-6 text-emerald-600">{fv.sellingPrice}</td>
+                            <td className="py-3 px-6">
+                              <button
+                                className="px-6 py-2 rounded-full font-bold text-lg transition-all duration-300 bg-emerald-500 hover:bg-emerald-600 hover:shadow-lg hover:scale-105 active:scale-95"
+                                onClick={() => handleSell(fv)}
+                              >
+                                🚀 Sell Now
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </>
+            )}
           </div>
-
-          {/**product details */}
-          {loading ? (
-            <div className="grid gap-1 w-full">
-              <p className="bg-slate-200 animate-pulse  h-6 rounded-full inline-block w-full"></p>
-              <h2 className="text-2xl lg:text-4xl font-medium h-6 bg-slate-200 animate-pulse w-full"></h2>
-              <p className="capitalize text-slate-400 bg-slate-200 min-w-[100px] animate-pulse h-6 w-full"></p>
-              <div className="text-slate-600 flex items-center gap-1 animate-pulse w-full">
-                <PiDotsNine />
-                <PiDotsNine />
-                <PiDotsNine />
-                <PiDotsNine />
-                <PiDotsNine />
-              </div>
-
-              <div className="flex items-center gap-2 text-2xl lg:text-3xl font-medium my-1 h-6 animate-pulse w-full">              <p className="text-slate-400"></p>
-                <p className="text-slate-400 underline w-full"></p>
-                <p className="text-slate-200 bg-slate-400 w-full"></p>
-              </div>
-
-              <div className="grid items-center gap-3 my-2 w-full">
-                <button className="h-6 bg-slate-200 rounded animate-pulse w-full"></button>
-                <button className="h-6 bg-slate-200 rounded animate-pulse w-full"></button>
-              </div>
-
-              <div>
-                <p className="text-slate-600 font-medium my-1 h-6  bg-slate-200 rounded animate-pulse w-full"></p>
-                <p className="text-slate-600 font-medium my-1 h-6  bg-slate-200 rounded animate-pulse w-full"></p>
-              </div>
-            </div>
-          ) : (
-            <div className="gap-1 flex flex-col">
-              <p className="bg-emerald-400 text-black px-2 rounded-full inline-block w-fit">{data?.brandName}</p>
-              <h2 className="text-2xl lg:text-4xl font-medium">{data?.productName}</h2>
-              <p className="capitalize text-slate-400">{data?.category}</p>
-              <div className="text-emerald-600 flex items-center gap-1">
-                <FaStar />
-                <FaStar />
-                <FaStar />
-                <FaStar />
-                <FaStarHalf />
-              </div>
-
-              <div className="grid items-center gap-2 text-2xl font-medium">
-                <p>{displayUSDCurrency(data.sellingPrice)}</p>
-                <p className="text-slate-400">facevalue</p>
-                <p className="text-slate-400 underline">{data.facevalue}</p>
-              </div>
-
-              <div className="grid items-center gap-3 my-2">
-                <button className="border-2 border-emerald-900 px-3 py-1 min-w-[120px] font-medium hover:bg-yellow-600" onClick={handleSell}>Sell</button>
-              </div>
-
-              <div>
-                <p className="text-slate-600 font-medium my-1">Offer Terms:</p>
-                <p>{data?.description}</p>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
-      {showUploadForm && (
+      {/* User Upload Market Form */}
+      {showUploadForm && selectedFaceValue && (
         <UserUploadMarket
           onClose={() => setShowUploadForm(false)}
-          fetchData={() => {}}
+          fetchData={() => setShowUploadForm(false)}
           productDetails={{
             productName: data.productName,
-            productImage: data.productImage,
-            rate: data.sellingPrice,
+            productImage: data.productImage[0],
+            currency: activeCurrency?.currency,
+            rate: selectedFaceValue?.sellingPrice,
+            faceValue: selectedFaceValue?.faceValue,
             description: data.description,
           }}
         />

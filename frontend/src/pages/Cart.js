@@ -127,7 +127,6 @@ const Cart = () => {
         </div>
 
         <div className='flex flex-col lg:flex-row gap-10 lg:justify-between p-4'>   
-                {/***view product */}
                 <div className='w-full max-w-3xl'>
                     {
                         loading ? (
@@ -143,10 +142,9 @@ const Cart = () => {
                            return(
                             <div key={product?._id+"Add To Cart Loading"} className='w-full bg-white h-32 my-2 border border-slate-300  rounded grid grid-cols-[128px,1fr]'>
                                 <div className='w-32 h-full bg-slate-200'>
-                                    <img src={product?.productId?.productImage[0]} className='w-full h-full object-scale-down mix-blend-multiply' />
+                                    <img src={product?.productId?.productImage[0]} className='w-full h-full object-scale-down mix-blend-multiply' /> 
                                 </div>
                                 <div className='px-4 py-2 relative'>
-                                    {/**delete product */}
                                     <div className='absolute right-0 text-red-600 rounded-full p-2 hover:bg-red-600 hover:text-white cursor-pointer' onClick={()=>deleteCartProduct(product?._id)}>
                                         <MdDelete/>
                                     </div>
@@ -171,7 +169,6 @@ const Cart = () => {
                 </div>
 
 
-                {/***summary  */}
                 <div className='mt-5 lg:mt-0 w-full max-w-sm'>
                         {
                             loading ? (

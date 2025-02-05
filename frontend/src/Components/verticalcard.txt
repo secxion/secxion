@@ -1,75 +1,420 @@
-import React, { useContext } from "react";
-import { Link } from "react-router-dom";
-import scrollTop from "../helpers/scrollTop";
-import Context from "../Context";
-import addToCart from "../helpers/addToCart";
-import { motion } from "framer-motion";
+import React, { useState } from 'react';
+import { CgClose } from "react-icons/cg";
+import { FaCloudUploadAlt } from "react-icons/fa";
+import uploadImage from '../helpers/uploadImage';
+import DisplayImage from './DisplayImage';
+import { MdDelete } from "react-icons/md";
+import { toast } from 'react-toastify';
+import SummaryApi from '../common';
 
-const VerticalCard = ({ loading, data = [] }) => {
-  const loadingList = new Array(8).fill(null);
-  const { fetchUserAddToCart } = useContext(Context);
+const UserUploadMarket = ({
+  onClose = () => {},
+  fetchData = () => {},
+  productDetails = {},
+}) => {
+  const [data, setData] = useState({
+    Image: [],
+    totalAmount:  "",
+    description:  "",
+  });
 
-  const handleAddToCart = async (e, id) => {
-    await addToCart(e, id);
-    fetchUserAddToCart();
+  const [openFullScreenImage, setOpenFullScreenImage] = useState(false);
+  const [fullScreenImage, setFullScreenImage] = useState("");
+
+  const handleOnChange = (e) => {
+    const { name, value } = e.target;
+    setData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  if (!Array.isArray(data)) {
-    console.error("The 'data' prop is not an array:", data);
-    return <p className="text-red-500">Error: Unable to display products.</p>;
-  }
+  const handleUploadImage = async (e) => {
+    const file = e.target.files[0];
+    const uploadImageCloudinary = await uploadImage(file);
+
+    setData((prev) => ({
+      ...prev,
+      Image: [...prev.Image, uploadImageCloudinary.url],
+    }));
+  };
+
+  const handleDeleteImage = (index) => {
+    const newImages = [...data.Image];
+    newImages.splice(index, 1);
+
+    setData((prev) => ({
+      ...prev,
+      Image: newImages,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const response = await fetch(SummaryApi.userMarket.url, {
+      method: SummaryApi.userMarket.method,
+      credentials: 'include',
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (responseData.success) {
+      toast.success(responseData.message);
+      onClose();
+      fetchData();
+    } else if (responseData.error) {
+      toast.error(responseData.message);
+    }
+  };
 
   return (
-    <>
-      {loading
-        ? loadingList.map((_, index) => (
-            <div
-              key={index}
-              className="bg-white p-4 rounded-lg shadow animate-pulse"
-            >
-              <div className="h-32 bg-gray-200 rounded-md mb-4"></div>
-              <div className="h-6 bg-gray-200 rounded-md mb-2"></div>
-              <div className="h-4 bg-gray-200 rounded-md"></div>
+    <div className='fixed w-full h-full bg-gray-800 bg-opacity-50 top-0 left-0 flex justify-center items-center pt-16'>
+      <div className='bg-white p-6 rounded-2xl w-full max-w-2xl shadow-lg transition-transform transform scale-95 hover:scale-100 duration-300' style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+        {/* Header Section */}
+        <div className='flex justify-between items-center mb-6'>
+          <h2 className='font-extrabold text-2xl text-gray-800'>Upload Product</h2>
+          <div
+            className='text-2xl text-gray-500 hover:text-red-600 cursor-pointer'
+            onClick={onClose}
+          >
+            <CgClose />
+          </div>
+        </div>
+
+        {/* Product Details Section */}
+        {productDetails && (
+          <div className='border rounded-lg p-4 bg-gray-50 shadow-inner mb-6'>
+            <div className='flex items-center gap-4'>
+              <img
+                src={productDetails.productImage || ''}
+                alt='Product'
+                className='w-24 h-24 object-cover rounded-lg border'
+              />
+              <div>
+                <h3 className='font-bold text-gray-800 text-lg'>{productDetails.productName}</h3>
+                <p className='text-gray-600'>Currency: {productDetails.currency}</p>
+                <p className='text-gray-600'>FaceValue: {productDetails.faceValue}</p>
+                <p className='text-gray-600'>Rate: {productDetails.rate}</p>
+
+              </div>
             </div>
-          ))
-        : data.map((product) => (
-            <motion.div
-              key={product._id}
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              whileHover={{ scale: 1.05 }}
-              className="bg-white p-4 rounded-lg shadow-lg transition-transform"
-            >
-              <Link to={`/product/${product._id}`} onClick={scrollTop}>
-                <div className="h-40 overflow-hidden rounded-lg mb-4 bg-gray-100 flex items-center justify-center">
-                  <img
-                    src={product.productImage?.[0]}
-                    alt={product.productName}
-                    className="h-full w-full object-contain"
-                  />
+            <p className='text-gray-600 mt-4'>{productDetails.description}</p>
+          </div>
+        )}
+
+        {/* Upload Form Section */}
+        <form className='space-y-6' onSubmit={handleSubmit}>
+          {/* Image Upload */}
+          <div>
+            <label htmlFor='Image' className='block font-medium text-gray-700 mb-2'>Images:</label>
+            <label htmlFor='uploadImageInput'>
+              <div className='p-4 border rounded-lg bg-gray-50 flex justify-center items-center cursor-pointer hover:bg-gray-100 shadow-md'>
+                <div className='text-gray-500 flex flex-col items-center'>
+                  <FaCloudUploadAlt className='text-5xl text-blue-500' />
+                  <p className='text-sm'>Upload Product Image</p>
                 </div>
-                <h3 className="font-medium text-sm md:text-base text-black line-clamp-2">
-                  {product.productName}
-                </h3>
-                {/* <div className="text-red-600 font-medium text-sm md:text-base">
-                  ${product.sellingPrice?.toFixed(2)}
-                </div> */}
-                {/* {product.facevalue && (
-                  <div className="text-gray-500 line-through text-sm">
-                    ${product.facevalue.toFixed(2)}
+              </div>
+              <input
+                type='file'
+                id='uploadImageInput'
+                className='hidden'
+                onChange={handleUploadImage}
+              />
+            </label>
+            <div className='flex gap-2 mt-4 flex-wrap'>
+              {data?.Image.length > 0 ? (
+                data.Image.map((el, index) => (
+                  <div className='relative group' key={index}>
+                    <img
+                      src={el}
+                      alt={`product-${index}`}
+                      className='w-20 h-20 object-cover rounded-lg border cursor-pointer hover:scale-105 transition-transform duration-200'
+                      onClick={() => {
+                        setOpenFullScreenImage(true);
+                        setFullScreenImage(el);
+                      }}
+                    />
+                    <div
+                      className='absolute top-1 right-1 p-1 bg-red-600 text-white rounded-full hidden group-hover:block cursor-pointer'
+                      onClick={() => handleDeleteImage(index)}
+                    >
+                      <MdDelete />
+                    </div>
                   </div>
-                )} */}
-              </Link>
-              {/* <button
-                onClick={(e) => handleAddToCart(e, product._id)}
-                className="mt-2 w-full bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded-lg"
-              >
-                Add to Cart
-              </button> */}
-            </motion.div>
-          ))}
-    </>
+                ))
+              ) : (
+                <p className='text-red-600 text-sm'>*Please upload at least one product image</p>
+              )}
+            </div>
+          </div>
+          {/* Total Amount */}
+          <div>
+            <label htmlFor='totalAmount' className='block font-medium text-gray-700 mb-2'>Total Amount:</label>
+            <input
+              type='number'
+              id='totalAmount'
+              name='totalAmount'
+              value={data.totalAmount}
+              onChange={handleOnChange}
+              className='w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring focus:ring-blue-300 shadow-sm'
+              required
+            />
+          </div>
+          {/* Remarks */}
+          <div>
+            <label htmlFor='description' className='block font-medium text-gray-700 mb-2'>Remarks:</label>
+            <textarea
+              id='description'
+              name='description'
+              value={data.description}
+              onChange={handleOnChange}
+              rows={4}
+              className='w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring focus:ring-blue-300 shadow-sm'
+            ></textarea>
+          </div>
+          {/* Submit Button */}
+          <button className="mt-5 w-full bg-emerald-600 text-white p-3 rounded-lg font-semibold hover:bg-emerald-700 shadow-lg hover:shadow-xl transition duration-300">
+            Submit
+          </button>
+        </form>
+      </div>
+      {/* Fullscreen Image Display */}
+      {openFullScreenImage && (
+        <DisplayImage
+          onClose={() => setOpenFullScreenImage(false)}
+          imgUrl={fullScreenImage}
+        />
+      )}
+    </div>
   );
 };
 
-export default VerticalCard;
+export default UserUploadMarket;
+
+
+//
+
+
+import React, { useEffect, useState } from 'react';
+import { CgClose } from "react-icons/cg";
+import { FaCloudUploadAlt } from "react-icons/fa";
+import uploadImage from '../helpers/uploadImage';
+import DisplayImage from './DisplayImage';
+import { MdDelete } from "react-icons/md";
+import { toast } from 'react-toastify';
+import SummaryApi from '../common';
+
+const UserUploadMarket = ({
+  onClose = () => {},
+  fetchData = () => {},
+  productDetails = {},
+}) => {
+  const [data, setData] = useState({
+    Image: [],
+    totalAmount: "",
+    userRemark: "",
+    productName: productDetails.productName || "",
+    brandName: productDetails.brandName || "",
+    category: productDetails.category || "",
+    description: productDetails.description || "",
+    pricing: Array.isArray(productDetails.pricing) ? productDetails.pricing : [], // Ensure it's always an array
+  });
+
+  useEffect(() => {
+    setData((prevData) => ({
+      ...prevData,
+      productName: productDetails.productName || "",
+      brandName: productDetails.brandName || "",
+      category: productDetails.category || "",
+      description: productDetails.description || "",
+      pricing: Array.isArray(productDetails.pricing) ? productDetails.pricing : [], // Ensure it's always an array
+    }));
+  }, [productDetails]);
+
+  const [openFullScreenImage, setOpenFullScreenImage] = useState(false);
+  const [fullScreenImage, setFullScreenImage] = useState("");
+
+  const handleOnChange = (e) => {
+    const { name, value } = e.target;
+    setData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleUploadImage = async (e) => {
+    const file = e.target.files[0];
+    const uploadImageCloudinary = await uploadImage(file);
+
+    setData((prev) => ({
+      ...prev,
+      Image: [...prev.Image, uploadImageCloudinary.url],
+    }));
+  };
+
+  const handleDeleteImage = (index) => {
+    const newImages = [...data.Image];
+    newImages.splice(index, 1);
+
+    setData((prev) => ({
+      ...prev,
+      Image: newImages,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const response = await fetch(SummaryApi.userMarket.url, {
+      method: SummaryApi.userMarket.method,
+      credentials: 'include',
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (responseData.success) {
+      toast.success(responseData.message);
+      onClose();
+      fetchData();
+    } else if (responseData.error) {
+      toast.error(responseData.message);
+    }
+  };
+
+  return (
+    <div className='fixed w-full h-full bg-gray-800 bg-opacity-50 top-0 left-0 flex justify-center items-center pt-16'>
+      <div className='bg-white p-6 rounded-2xl w-full max-w-2xl shadow-lg transition-transform transform scale-95 hover:scale-100 duration-300' style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+        {/* Header Section */}
+        <div className='flex justify-between items-center mb-6'>
+          <h2 className='font-extrabold text-2xl text-gray-800'>Upload Product</h2>
+          <div
+            className='text-2xl text-gray-500 hover:text-red-600 cursor-pointer'
+            onClick={onClose}
+          >
+            <CgClose />
+          </div>
+        </div>
+
+         {/* Product Details Section */}
+         {productDetails && (
+          <div className="border rounded-lg p-4 bg-gray-50 shadow-inner mb-6">
+            <div className="flex items-center gap-4">
+              <img
+                src={productDetails.productImage || ""}
+                alt="Product"
+                className="w-24 h-24 object-cover rounded-lg border"
+              />
+              <div>
+                <h3 className="font-bold text-gray-800 text-lg">{productDetails.productName}</h3>
+                <p className="text-gray-600">
+                    Currency: {productDetails?.pricing?.map(p => p.currency).join(", ") || "N/A"}
+                  </p>
+                  <p className="text-gray-600">
+                    Face Values: {productDetails?.pricing?.map(p => p.faceValues?.map(fv => fv.faceValue).join(", ")).join("; ") || "N/A"}
+                      </p>
+
+              </div>
+            </div>
+            <p className="text-gray-600 mt-4">{productDetails.description}</p>
+          </div>
+        )}
+
+        {/* Upload Form Section */}
+        <form className='space-y-6' onSubmit={handleSubmit}>
+          {/* Image Upload */}
+          <div>
+            <label htmlFor='Image' className='block font-medium text-gray-700 mb-2'>Images:</label>
+            <label htmlFor='uploadImageInput'>
+              <div className='p-4 border rounded-lg bg-gray-50 flex justify-center items-center cursor-pointer hover:bg-gray-100 shadow-md'>
+                <div className='text-gray-500 flex flex-col items-center'>
+                  <FaCloudUploadAlt className='text-5xl text-blue-500' />
+                  <p className='text-sm'>Upload Product Image</p>
+                </div>
+              </div>
+              <input
+                type='file'
+                id='uploadImageInput'
+                className='hidden'
+                onChange={handleUploadImage}
+              />
+            </label>
+            <div className='flex gap-2 mt-4 flex-wrap'>
+              {data?.Image.length > 0 ? (
+                data.Image.map((el, index) => (
+                  <div className='relative group' key={index}>
+                    <img
+                      src={el}
+                      alt={`product-${index}`}
+                      className='w-20 h-20 object-cover rounded-lg border cursor-pointer hover:scale-105 transition-transform duration-200'
+                      onClick={() => {
+                        setOpenFullScreenImage(true);
+                        setFullScreenImage(el);
+                      }}
+                    />
+                    <div
+                      className='absolute top-1 right-1 p-1 bg-red-600 text-white rounded-full hidden group-hover:block cursor-pointer'
+                      onClick={() => handleDeleteImage(index)}
+                    >
+                      <MdDelete />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className='text-red-600 text-sm'>*Please upload at least one product image</p>
+              )}
+            </div>
+          </div>
+          {/* Total Amount */}
+          <div>
+            <label htmlFor='totalAmount' className='block font-medium text-gray-700 mb-2'>Total Amount:</label>
+            <input
+              type='number'
+              id='totalAmount'
+              name='totalAmount'
+              value={data.totalAmount}
+              onChange={handleOnChange}
+              className='w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring focus:ring-blue-300 shadow-sm'
+              required
+            />
+          </div>
+          {/* Remarks */}
+          <div>
+            <label htmlFor='userRemark' className='block font-medium text-gray-700 mb-2'>Remarks:</label>
+            <textarea
+              id='userRemark'
+              name='userRemark'
+              value={data.userRemark}
+              onChange={handleOnChange}
+              rows={4}
+              className='w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring focus:ring-blue-300 shadow-sm'
+            ></textarea>
+          </div>
+          {/* Submit Button */}
+          <button className="mt-5 w-full bg-emerald-600 text-white p-3 rounded-lg font-semibold hover:bg-emerald-700 shadow-lg hover:shadow-xl transition duration-300">
+            Submit
+          </button>
+        </form>
+      </div>
+      {/* Fullscreen Image Display */}
+      {openFullScreenImage && (
+        <DisplayImage
+          onClose={() => setOpenFullScreenImage(false)}
+          imgUrl={fullScreenImage}
+        />
+      )}
+    </div>
+  );
+};
+
+export default UserUploadMarket;
+
+

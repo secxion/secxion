@@ -7,9 +7,9 @@ import { FaCreditCard, FaGift, FaPaypal } from "react-icons/fa";
 import VerticalCard from "../Components/VerticalCard";
 
 const CategoryProduct = () => {
-  const [data, setData] = useState([]); // Stores product data
-  const [loading, setLoading] = useState(false); // Loading state
-  const [sortBy, setSortBy] = useState(""); // Sorting option
+  const [data, setData] = useState([]); 
+  const [loading, setLoading] = useState(false); 
+  const [sortBy, setSortBy] = useState(""); 
   const location = useLocation();
   const navigate = useNavigate();
 

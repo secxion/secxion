@@ -7,22 +7,21 @@ import Context from "../Context";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(true); // Initial loading state to check login
-  const [formSubmitting, setFormSubmitting] = useState(false); // For login form submission
+  const [loading, setLoading] = useState(true);
+  const [formSubmitting, setFormSubmitting] = useState(false);
   const [data, setData] = useState({
     email: "",
     password: "",
   });
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
-  const { fetchUserDetails, fetchUserAddToCart, isLoggedIn } = useContext(Context); // Use `isLoggedIn` from context
+  const { fetchUserDetails, isLoggedIn } = useContext(Context);
 
   useEffect(() => {
-    // Redirect if already logged in
     if (isLoggedIn) {
       navigate("home");
     } else {
-      setLoading(false); // Set loading to false if not logged in
+      setLoading(false);
     }
   }, [isLoggedIn, navigate]);
 
@@ -42,7 +41,7 @@ const Login = () => {
     try {
       const response = await fetch(SummaryApi.signIn.url, {
         method: SummaryApi.signIn.method,
-        credentials: "include",
+        credentials: "include", 
         headers: {
           "Content-Type": "application/json",
         },
@@ -53,9 +52,8 @@ const Login = () => {
 
       if (result.success) {
         toast.success(result.message);
-        fetchUserDetails();
-        fetchUserAddToCart();
-        navigate("/");
+        fetchUserDetails(); 
+        navigate("/"); 
       } else {
         setErrorMessage(result.message || "Invalid credentials. Please try again.");
         toast.error(result.message);

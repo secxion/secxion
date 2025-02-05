@@ -5,55 +5,96 @@
 
 /* Global Styles */
 body {
-  @apply bg-gradient-to-r from-blue-500 via-yellow-500 to-red-500;
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  @apply bg-gradient-to-br from-indigo-900 via-purple-700 to-blue-500;
+  font-family: 'Poppins', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Code Blocks */
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-  @apply bg-gray-100 p-2 rounded-md text-sm text-gray-700;
+/* Glassmorphism Cards */
+.glass-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  transition: transform 0.3s ease;
+}
+.glass-card:hover {
+  transform: translateY(-5px);
 }
 
-/* Scrollbar Customization */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-thumb {
-  @apply bg-blue-500 rounded-lg;
-}
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-blue-700;
-}
-
-/* Utility Classes for Customization */
-.card {
-  @apply bg-white shadow-lg rounded-2xl p-4 transition-transform transform hover:scale-105;
-}
-
+/* Neon Button Styles */
 .button {
-  @apply px-6 py-2 rounded-full font-semibold text-white;
+  @apply px-6 py-3 rounded-full font-semibold text-white;
+  font-size: 1.1rem;
+  transition: background 0.3s, box-shadow 0.3s;
 }
 .button-primary {
-  @apply bg-blue-500 hover:bg-blue-700 transition-all;
+  background: linear-gradient(90deg, #06b6d4, #3b82f6);
+  box-shadow: 0px 0px 10px rgba(6, 182, 212, 0.8);
 }
-.button-secondary {
-  @apply bg-yellow-500 hover:bg-yellow-700 transition-all;
+.button-primary:hover {
+  box-shadow: 0px 0px 20px rgba(6, 182, 212, 1);
 }
 
-/* Typography */
-h1, h2, h3, h4, h5, h6 {
-  @apply font-semibold text-gray-900 leading-tight;
+/* Futuristic Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
 }
-p {
-  @apply text-gray-700 text-base;
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #3b82f6, #06b6d4);
+  border-radius: 10px;
 }
+
+/* Animated Text */
+.neon-text {
+  color: #06b6d4;
+  text-shadow: 0 0 5px #06b6d4, 0 0 10px #06b6d4;
+}
+
+/* Hover Effects */
+.hover-glow:hover {
+  box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  transition: 0.3s;
+}
+
+/* Card Container with Grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+/* Links */
 a {
-  @apply text-blue-500 hover:underline hover:text-blue-700 transition-colors;
+  @apply text-cyan-400 hover:text-cyan-300 transition-colors;
+  text-decoration: none;
+}
+
+/* Container Styles */
+.container {
+  max-width: 1200px; 
+  margin: 0 auto; 
+  padding: 16px; 
+}
+
+.table-container {
+  max-height: 300px; 
+  overflow-y: auto;  
+}
+
+.flex-container {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  gap: 16px; /* Space between items */
+}
+
+@media (max-width: 768px) {
+  .flex-container {
+    flex-direction: column; /* Stack items on smaller screens */
+  }
 }

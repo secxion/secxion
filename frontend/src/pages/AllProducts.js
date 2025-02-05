@@ -8,43 +8,47 @@ const AllProducts = () => {
   const [allProduct, setAllProduct] = useState([]);
 
   const fetchAllProduct = async () => {
-    const response = await fetch(SummaryApi.allProduct.url);
-    const dataResponse = await response.json();
-
-    console.log("product data", dataResponse)
-
-    setAllProduct(dataResponse?.data || []);
+    try {
+      const response = await fetch(SummaryApi.allProduct.url);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const dataResponse = await response.json();
+      setAllProduct(dataResponse?.data || []);
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+    }
   };
 
   useEffect(() => {
     fetchAllProduct();
   }, []);
+
   return (
-    <div>
-      <div className="bg-white py-2 px-4 flex justify-between items-center">
-        <h2 className="font-bold text-lg">All Product</h2>
+    <div className="container mx-auto p-4">
+      <header className="bg-white py-2 px-4 flex justify-between items-center shadow-md rounded">
+        <h2 className="font-bold text-lg">All Products</h2>
         <button
-          className="border-2 border-purple-900 text-black hover:bg-purple-800 hover:text-white transition-all py-1 px-3 "
+          className="border-2 border-purple-900 text-black hover:bg-purple-800 hover:text-white transition-all py-1 px-3 rounded"
           onClick={() => setOpenUploadProduct(true)}
+          aria-label="Upload Product"
         >
           Upload Product
         </button>
-      </div>
+      </header>
 
-      {/**all product */}
-      <div className="flex items-center flex-wrap gap-3 py-8 p-4 h-[calc(100vh-190px)] overflow-y-scroll">
+      <main className="flex items-center flex-wrap gap-3 py-8 h-[calc(100vh-190px)] overflow-y-auto">
+        {allProduct.length > 0 ? (
+          allProduct.map((product, index) => (
+            <AdminProductCard data={product} key={index} fetchdata={fetchAllProduct} />
+          ))
+        ) : (
+          <p className="text-center w-full">No products available.</p>
+        )}
+      </main>
 
-        {allProduct.map((product, index) => {
-          return (
-            <AdminProductCard data={product} key={index+"allProduct"} fetchdata={fetchAllProduct}/>
-           
-          );
-        })}
-      </div>
-
-      {/**upload prouct component */}
       {openUploadProduct && (
-        <UploadProduct onClose={() => setOpenUploadProduct(false)}fetchData={fetchAllProduct}/>
+        <UploadProduct onClose={() => setOpenUploadProduct(false)} fetchData={fetchAllProduct} />
       )}
     </div>
   );

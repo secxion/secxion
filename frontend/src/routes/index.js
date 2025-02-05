@@ -22,6 +22,42 @@ import ProtectedRoute from "../Components/ProtectedRoute";
 import UserUploadMarket from "../Components/UserUploadMarket";
 import UserMarket from "../pages/UserMarket";
 
+// Define routes in a more structured way
+const publicRoutes = [
+  {
+    path: "login",
+    element: <Login />,
+  },
+  {
+    path: "sign-up",
+    element: <SignUp />,
+  },
+  {
+    path: "reset",
+    element: <Reset />,
+  },
+];
+
+const protectedRoutes = [
+  { path: "/", element: <Home /> },
+  { path: "home", element: <Home /> },
+  { path: "section", element: <Section /> },
+  { path: "userMarketUpload", element: <UserUploadMarket /> },
+  { path: "record", element: <UserMarket /> },
+  { path: "product-category", element: <CategoryProduct /> },
+  { path: "product/:id", element: <ProductDetails /> },
+  { path: "cart", element: <Cart /> },
+  { path: "search", element: <SearchProduct /> },
+  { path: "wallet", element: <Wallet /> },
+  { path: "notifications", element: <Notification /> },
+  { path: "profile", element: <Profile /> },
+  { path: "settings", element: <Settings /> },
+];
+
+const adminRoutes = [
+  { path: "all-users", element: <AllUsers /> },
+  { path: "all-products", element: <AllProducts /> },
+];
 
 const router = createBrowserRouter([
   {
@@ -29,161 +65,22 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       // Public routes with redirect for logged-in users
-      {
-        path: "login",
-        element: (
-          <RedirectIfLoggedIn>
-            <Login />
-          </RedirectIfLoggedIn>
-        ),
-      },
-      {
-        path: "sign-up",
-        element: (
-          <RedirectIfLoggedIn>
-            <SignUp />
-          </RedirectIfLoggedIn>
-        ),
-      },
-      {
-        path: "reset",
-        element: (
-          <RedirectIfLoggedIn>
-            <Reset />
-          </RedirectIfLoggedIn>
-        ),
-      },
-
+      ...publicRoutes.map(route => ({
+        path: route.path,
+        element: <RedirectIfLoggedIn>{route.element}</RedirectIfLoggedIn>,
+      })),
       // Protected routes
-      {
-        path: "/",
-        element: (
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "home",
-        element: (
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "section",
-        element: (
-          <ProtectedRoute>
-            <Section />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "userMarketUpload",
-        element: (
-          <ProtectedRoute>
-            <UserUploadMarket />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "record",
-        element: (
-          <ProtectedRoute>
-            <UserMarket />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "product-category",
-        element: (
-          <ProtectedRoute>
-            <CategoryProduct />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "product/:id",
-        element: (
-          <ProtectedRoute>
-            <ProductDetails />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "cart",
-        element: (
-          <ProtectedRoute>
-            <Cart />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "search",
-        element: (
-          <ProtectedRoute>
-            <SearchProduct />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "wallet",
-        element: (
-          <ProtectedRoute>
-            <Wallet />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "notifications",
-        element: (
-          <ProtectedRoute>
-            <Notification />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "profile",
-        element: (
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "settings",
-        element: (
-          <ProtectedRoute>
-            <Settings />
-          </ProtectedRoute>
-        ),
-      },
+      ...protectedRoutes.map(route => ({
+        path: route.path,
+        element: <ProtectedRoute>{route.element}</ProtectedRoute>,
+      })),
       {
         path: "admin-panel",
-        element: (
-          <ProtectedRoute>
-            <AdminPanel />
-          </ProtectedRoute>
-        ),
-        children: [
-          {
-            path: "all-users",
-            element: (
-              <ProtectedRoute>
-                <AllUsers />
-              </ProtectedRoute>
-            ),
-          },
-          {
-            path: "all-products",
-            element: (
-              <ProtectedRoute>
-                <AllProducts />
-              </ProtectedRoute>
-            ),
-          },
-        ],
+        element: <ProtectedRoute><AdminPanel /></ProtectedRoute>,
+        children: adminRoutes.map(route => ({
+          path: route.path,
+          element: <ProtectedRoute>{route.element}</ProtectedRoute>,
+        })),
       },
     ],
   },
