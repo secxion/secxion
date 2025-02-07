@@ -2,6 +2,7 @@ const userModel = require("../../models/userModel");
 
 async function userDetailsController(req, res) {
   try {
+    // Ensure req.userId is available
     if (!req.userId) {
       return res.status(401).json({
         message: "Unauthorized, user ID not found",

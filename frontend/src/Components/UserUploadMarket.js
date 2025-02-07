@@ -6,12 +6,14 @@ import DisplayImage from './DisplayImage';
 import { MdDelete } from "react-icons/md";
 import { toast } from 'react-toastify';
 import SummaryApi from '../common';
+import { useNavigate } from 'react-router-dom';
 
 const UserUploadMarket = ({
   onClose = () => {},
   fetchData = () => {},
   productDetails = {},
 }) => {
+  const navigate = useNavigate();
   const [data, setData] = useState({
     Image: [],
     totalAmount: "",
@@ -21,7 +23,7 @@ const UserUploadMarket = ({
     brandName: productDetails.brandName || "",
     category: productDetails.category || "",
     description: productDetails.description || "",
-    pricing: Array.isArray(productDetails.pricing) ? productDetails.pricing : [], // Ensure it's always an array
+    pricing: Array.isArray(productDetails.pricing) ? productDetails.pricing : [],
   });
 
   useEffect(() => {
@@ -103,6 +105,7 @@ const UserUploadMarket = ({
       toast.success(responseData.message);
       onClose();
       fetchData();
+      navigate('/record');
     } else {
       toast.error(responseData.message);
     }
@@ -134,7 +137,6 @@ const UserUploadMarket = ({
                 <p className='text-gray-600'>Currency: {productDetails.currency}</p>
                 <p className='text-gray-600'>FaceValue: {productDetails.faceValue}</p>
                 <p className='text-gray-600'>Rate: {productDetails.rate}</p>
-
               </div>
             </div>
             <p className='text-gray-600 mt-4'>{productDetails.description}</p>

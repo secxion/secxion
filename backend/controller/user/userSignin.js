@@ -6,11 +6,8 @@ async function userSignInController(req, res) {
   try {
     const { email, password } = req.body;
 
-    if (!email) {
-      throw new Error("Please provide email");
-    }
-    if (!password) {
-      throw new Error("Please provide password");
+    if (!email || !password) {
+      throw new Error("Please provide email and password");
     }
 
     const user = await userModel.findOne({ email });
@@ -27,16 +24,20 @@ async function userSignInController(req, res) {
         email: user.email,
       };
 
-      const token = await jwt.sign(tokenData, process.env.TOKEN_SECRET_KEY, { expiresIn: 60 * 60 * 8 });
+      const token = await jwt.sign(tokenData, process.env.TOKEN_SECRET_KEY, { expiresIn: "8h" });
 
       const tokenOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Strict',  
+        sameSite: 'Strict',
       };
 
-      res.cookie("token", token, tokenOptions).status(200).json({
-        message: "Login successfully",
+      // ✅ Set HTTP-only cookie
+      res.cookie("token", token, tokenOptions);
+
+      // ✅ ALSO return the token in the response body
+      res.status(200).json({
+        message: "Login successful",
         data: { token },
         success: true,
         error: false,

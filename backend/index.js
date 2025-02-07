@@ -8,6 +8,7 @@ const connectDB = require('./config/db');
 const router = require('./routes');
 const helmet = require("helmet");
 const morgan = require('morgan'); 
+const mysql = require('mysql2/promise'); 
 
 const app = express();
 
@@ -39,13 +40,39 @@ app.use(cookieParser());
 
 app.use(morgan('combined')); 
 
+// Database connection
+const dbConfig = {
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
+};
+
 app.post('/api/some-endpoint', [
     body('username').isString().isLength({ min: 3 }),
     body('password').isString().isLength({ min: 6 })
-], (req, res) => {
+], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { username, password } = req.body;
+
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute('SELECT * FROM users WHERE username = ? AND password = ?', [username, password]);
+        
+        if (rows.length > 0) {
+            res.status(200).json({ message: 'Login successful' });
+        } else {
+            res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        await connection.end();
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Database error');
     }
 });
 

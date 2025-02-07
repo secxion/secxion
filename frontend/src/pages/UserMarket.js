@@ -1,33 +1,60 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext, useEffect, useState, useCallback } from "react";
 import SummaryApi from "../common";
 import UserUploadMarket from "../Components/UserUploadMarket";
 import HistoryCard from "../Components/HistoryCard";
+import UserContext from "../Context"; 
 
 const UserMarket = () => {
   const [openUploadProduct, setOpenUploadProduct] = useState(false);
   const [allProduct, setAllProduct] = useState([]);
+  const { user } = useContext(UserContext);
 
-  const fetchAllProduct = async () => {
-    const response = await fetch(SummaryApi.myMarket.url);
-    const dataResponse = await response.json();
-    setAllProduct(dataResponse?.data || []);
-  };
+  const fetchAllProduct = useCallback(async () => {
+    if (!user || !user._id) {
+      console.warn("User is not defined or userId is missing.");
+      return; 
+    }
+
+    try {
+      const response = await fetch(`${SummaryApi.myMarket.url}?userId=${user._id}`, {
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
+        credentials: "include",
+      });
+      
+      const dataResponse = await response.json();
+      console.log("product data", dataResponse);
+      setAllProduct(dataResponse?.data || []);
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+    }
+  }, [user]);
 
   useEffect(() => {
-    fetchAllProduct();
-  }, []);
+    if (user && user._id) {
+      fetchAllProduct();
+    }
+  }, [fetchAllProduct, user]);
 
   return (
     <div>
       <div className="bg-white py-2 px-4 flex justify-between items-center">
         <h2 className="font-bold text-lg">Record</h2>
-        
+        <button
+          className="border-2 border-purple-900 text-black hover:bg-purple-800 hover:text-white transition-all py-1 px-3"
+          onClick={() => setOpenUploadProduct(true)}
+        >
+          Sell Gift Card
+        </button>
       </div>
 
       <div className="flex items-center flex-wrap gap-3 py-8 p-4 h-[calc(100vh-190px)] overflow-y-scroll">
-        {allProduct.map((product) => (
-          <HistoryCard key={product._id} data={product} fetchData={fetchAllProduct} />
-        ))}
+        {allProduct.map((product, index) => {
+          return (
+            <HistoryCard data={product} key={index + "allProduct"} fetchdata={fetchAllProduct} />
+          );
+        })}
       </div>
 
       {openUploadProduct && (

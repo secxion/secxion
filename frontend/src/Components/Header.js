@@ -15,7 +15,7 @@ const Header = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchPanelOpen, setSearchPanelOpen] = useState(false);
   const user = useSelector((state) => state?.user?.user);
-  const context = useContext(Context);
+  const context = useContext(Context); 
   const navigate = useNavigate();
   const searchInput = useLocation();
   
@@ -31,6 +31,10 @@ const Header = () => {
       const response = await fetch(SummaryApi.logout_user.url, {
         method: SummaryApi.logout_user.method,
         credentials: "include",
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${context.token}`
+        }
       });
       const data = await response.json();
 
@@ -51,18 +55,22 @@ const Header = () => {
     setSearch(value);
 
     if (value.trim()) {
-      navigate(`/search?q=${value}`);
+      navigate(`/search?q=${encodeURIComponent(value)}`); 
     } else {
       navigate("/search");
     }
   };
 
+  const toggleMenuDisplay = () => setMenuDisplay((prev) => !prev);
+  const toggleSidebarOpen = () => setSidebarOpen((prev) => !prev);
+  const toggleSearchPanelOpen = () => setSearchPanelOpen((prev) => !prev);
+
   return (
-    <nav className="h-14 shadow-md bg-gray-200 fixed w-full z-50">
+    <nav className="h-14 shadow-lg bg-gradient-to-r from-gray-200 to-gray-300 fixed w-full z-50 border-b-2 border-gray-400">
       <div className="h-full container mx-auto flex items-center justify-between px-4">
-        {/* Home Icon */}
-        <div className="flex items-center flex-shrink-0">
-          {user?._id && (
+
+        {user?._id && (
+          <div className="flex items-center flex-shrink-0">
             <Link to="/">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -79,16 +87,15 @@ const Header = () => {
                 <path d="M3 9.5L12 3l9 6.5" stroke="#4F46E5" strokeWidth="2" />
               </svg>
             </Link>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Search Bar for Desktop */}
         {user?._id && (
           <div className="hidden md:flex items-center w-full max-w-sm relative">
             <input
               type="text"
               placeholder="Search Trade..."
-              className="w-full px-3 py-2 rounded-full outline-none focus:ring-2 focus:ring-blue-700 bg-gray-100"
+              className="w-full px-3 py-2 rounded-full outline-none focus:ring-2 focus:ring-blue-700 bg-gray-100 border border-gray-300 shadow-md"
               onChange={handleSearch}
               value={search}
             />
@@ -98,15 +105,10 @@ const Header = () => {
           </div>
         )}
 
-        {/* Profile & Logout */}
         <div className="flex items-center gap-6">
-          {/* Profile Icon */}
           {user?._id && (
             <div className="relative">
-              <div
-                className="cursor-pointer"
-                onClick={() => setMenuDisplay((prev) => !prev)}
-              >
+              <div className="cursor-pointer" onClick={toggleMenuDisplay}>
                 {user?.profilePic ? (
                   <img
                     src={user?.profilePic}
@@ -118,14 +120,13 @@ const Header = () => {
                 )}
               </div>
 
-              {/* Dropdown Menu */}
               {menuDisplay && (
-                <div className="absolute top-12 right-0 w-48 bg-white shadow-md rounded-md overflow-hidden z-50">
+                <div className="absolute top-12 right-0 w-48 bg-white shadow-md rounded-md overflow-hidden z-50 border border-gray-300">
                   {user?.role === ROLE.ADMIN && (
                     <Link
                       to="/admin-panel/all-products"
                       className="block px-4 py-2 hover:bg-gray-100"
-                      onClick={() => setMenuDisplay(false)}
+                      onClick={toggleMenuDisplay}
                     >
                       Admin Panel
                     </Link>
@@ -133,14 +134,14 @@ const Header = () => {
                   <Link
                     to="/profile"
                     className="block px-4 py-2 hover:bg-gray-100"
-                    onClick={() => setMenuDisplay(false)}
+                    onClick={toggleMenuDisplay}
                   >
                     My Profile
                   </Link>
                   <button
                     onClick={() => {
                       handleLogout();
-                      setMenuDisplay(false);
+                      toggleMenuDisplay();
                     }}
                     className="w-full text-left px-4 py-2 hover:bg-gray-100"
                   >
@@ -151,7 +152,6 @@ const Header = () => {
             </div>
           )}
 
-          {/* Logout Button for Large Screens */}
           {user?._id && (
             <button
               onClick={handleLogout}
@@ -178,11 +178,10 @@ const Header = () => {
           )}
         </div>
 
-        {/* Mobile Menu Toggle */}
         {user?._id && (
           <button
             className="lg:hidden text-gray-700 text-2xl"
-            onClick={() => setSidebarOpen(true)}
+            onClick={toggleSidebarOpen}
             aria-label="Open menu"
           >
             ☰
@@ -190,25 +189,23 @@ const Header = () => {
         )}
       </div>
 
-      {/* Floating Search Button for Mobile View */}
       {user?._id && (
         <button
-          className="fixed bottom-6 right-6 bg-blue-700 text-white p-4 rounded-full shadow-lg md:hidden"
-          onClick={() => setSearchPanelOpen((prev) => !prev)}
+          className="fixed bottom-6 right-6 bg-blue-700 text-white p-4 rounded-full shadow-lg md:hidden border border-gray-300"
+          onClick={toggleSearchPanelOpen}
           aria-label="Toggle search panel"
         >
           <FcSearch size={28} />
         </button>
       )}
 
-      {/* Slide-Up Search Panel */}
       {searchPanelOpen && (
         <div
-          className="fixed bottom-0 left-0 w-full bg-white shadow-lg p-4 z-50 md:hidden transition-transform transform translate-y-0"
+          className="fixed bottom-0 left-0 w-full bg-white shadow-lg p-4 z-50 md:hidden transition-transform transform translate-y-0 border-t border-gray-300"
         >
           <button
             className="absolute top-4 right-6 z-50 text-gray-700 text-2xl bg-white rounded-full p-6 shadow-md"
-            onClick={() => setSearchPanelOpen(false)}
+            onClick={toggleSearchPanelOpen}
             aria-label="Close search panel"
           >
             ✕
@@ -217,7 +214,7 @@ const Header = () => {
             <input
               type="text"
               placeholder="Search Trade..."
-              className="w-full px-3 py-2 rounded-full outline-none focus:ring-2 focus:ring-blue-700 bg-gray-100"
+              className="w-full px-3 py-2 rounded-full outline-none focus:ring-2 focus:ring-blue-700 bg-gray-100 border border-gray-300 shadow-md"
               onChange={handleSearch}
               value={search}
             />
@@ -228,12 +225,11 @@ const Header = () => {
         </div>
       )}
 
-      {/* Sidebar for Mobile View */}
       {sidebarOpen && user?._id && (
-        <div className="fixed top-0 left-0 w-3/4 h-full bg-gray-200 z-50">
+        <div className="fixed top-0 left-0 w-3/4 h-full bg-gray-200 z-50 border-r border-gray-400">
           <div className="p-4">
             <button
-              onClick={() => setSidebarOpen(false)}
+              onClick={toggleSidebarOpen}
               className="text-gray-700 text-2xl"
               aria-label="Close menu"
             >
@@ -242,24 +238,24 @@ const Header = () => {
             <nav className="mt-4">
               <Link
                 to="/home"
-                className="block text-gray-700 py-2"
-                onClick={() => setSidebarOpen(false)}
+                className="block text-gray-700 py-2 hover:bg-gray-100"
+                onClick={toggleSidebarOpen}
               >
                 Home
               </Link>
               <Link
                 to="/cart"
-                className="block text-gray-700 py-2"
-                onClick={() => setSidebarOpen(false)}
+                className="block text-gray-700 py-2 hover:bg-gray-100"
+                onClick={toggleSidebarOpen}
               >
                 Cart
               </Link>
               <button
                 onClick={() => {
                   handleLogout();
-                  setSidebarOpen(false);
+                  toggleSidebarOpen();
                 }}
-                className="block text-gray-700 py-2 text-left w-full"
+                className="block text-gray-700 py-2 text-left w-full hover:bg-gray-100"
               >
                 Logout
               </button>

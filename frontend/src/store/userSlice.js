@@ -1,28 +1,32 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
+  token: localStorage.getItem("token") || null, 
   user: null,
-  loading: true, // Tracks whether the authentication check is in progress
+  loading: false,
 };
 
-export const userSlice = createSlice({
-  name: 'user',
+const userSlice = createSlice({
+  name: "user",
   initialState,
   reducers: {
-    setUserDetails: (state, action) => {
-      state.user = action.payload;
-      state.loading = false; // Authentication resolved
+    setToken: (state, action) => {
+      state.token = action.payload;
+      localStorage.setItem("token", action.payload);
     },
-    clearUserDetails: (state) => {
-      state.user = null;
-      state.loading = false; // Authentication resolved
+ setUserDetails: (state, action) => {
+      state.user = action.payload;
     },
     setLoading: (state, action) => {
       state.loading = action.payload;
     },
+    logout: (state) => {
+      state.token = null;
+      state.user = null;
+      localStorage.removeItem("token"); 
+    },
   },
 });
 
-export const { setUserDetails, clearUserDetails, setLoading } = userSlice.actions;
-
+export const { setToken, setUserDetails, setLoading, logout } = userSlice.actions;
 export default userSlice.reducer;

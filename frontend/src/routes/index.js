@@ -22,7 +22,6 @@ import ProtectedRoute from "../Components/ProtectedRoute";
 import UserUploadMarket from "../Components/UserUploadMarket";
 import UserMarket from "../pages/UserMarket";
 
-// Define routes in a more structured way
 const publicRoutes = [
   {
     path: "login",
@@ -64,12 +63,10 @@ const router = createBrowserRouter([
     path: '',
     element: <App />,
     children: [
-      // Public routes with redirect for logged-in users
       ...publicRoutes.map(route => ({
         path: route.path,
         element: <RedirectIfLoggedIn>{route.element}</RedirectIfLoggedIn>,
       })),
-      // Protected routes
       ...protectedRoutes.map(route => ({
         path: route.path,
         element: <ProtectedRoute>{route.element}</ProtectedRoute>,

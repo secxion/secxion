@@ -1,48 +1,52 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { MdModeEditOutline } from "react-icons/md";
 import AdminEditProduct from './AdminEditProduct';
-import displayUSDCurrency from '../helpers/displayCurrency';
 
-const AdminProductCard = ({
-    data,
-    fetchdata    
-}) => {
-    const [editProduct,setEditProduct] = useState(false)
+const AdminProductCard = ({ data, fetchdata }) => {
+    const { productImage, productName } = data;
+    const [isEditing, setIsEditing] = useState(false);
 
-  return (
-    <div className='bg-white p-4 rounded '>
-       <div className='w-40'>
-            <div className='w-32 h-32 flex justify-center items-center'>
-              <img src={data?.productImage[0]} alt='' className='mx-auto object-fill h-full'/>   
-            </div> 
-            <h1 className='text-ellipsis line-clamp-2'>{data.productName}</h1>
-
-            <div>
-
-                <p className='font-semibold'>
-                  {
-                    displayUSDCurrency(data.sellingPrice)
-                  }
-        
-                </p>
-
-                <div className='w-fit ml-auto p-2 bg-green-100 hover:bg-green-600 rounded-full hover:text-white cursor-pointer' onClick={()=>setEditProduct(true)}>
-                    <MdModeEditOutline/>
+    return (
+        <div className='bg-white p-4 rounded shadow-md'>
+            <div className='w-40'>
+                <div className='w-32 h-32 flex justify-center items-center'>
+                    <img 
+                        src={productImage[0]} 
+                        alt={productName} 
+                        className='mx-auto object-cover h-full' 
+                    />
                 </div>
+                <h1 className='text-ellipsis line-clamp-2 font-semibold'>{productName}</h1>
 
+                <div className='flex justify-end'>
+                    <button 
+                        className='w-fit p-2 bg-green-100 hover:bg-green-600 rounded-full hover:text-white cursor-pointer' 
+                        onClick={() => setIsEditing(true)} 
+                        aria-label={`Edit ${productName}`} 
+                    >
+                        <MdModeEditOutline />
+                    </button>
+                </div>
             </div>
 
-          
-       </div>
-        
-        {
-          editProduct && (
-            <AdminEditProduct productData={data} onClose={()=>setEditProduct(false)} fetchdata={fetchdata}/>
-          )
-        }
-    
-    </div>
-  )
-}
+            {isEditing && (
+                <AdminEditProduct 
+                    productData={data} 
+                    onClose={() => setIsEditing(false)} 
+                    fetchdata={fetchdata} 
+                />
+            )}
+        </div>
+    );
+};
 
-export default AdminProductCard
+AdminProductCard.propTypes = {
+    data: PropTypes.shape({
+        productImage: PropTypes.arrayOf(PropTypes.string).isRequired,
+        productName: PropTypes.string.isRequired,
+    }).isRequired,
+    fetchdata: PropTypes.func.isRequired,
+};
+
+export default AdminProductCard;

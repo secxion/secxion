@@ -1,41 +1,59 @@
 const jwt = require('jsonwebtoken');
 
-async function authToken(req, res, next) {
-  try {
-    const token = req.cookies?.token;
-    console.log("Token received:", token);
-
-    if (!token) {
-      return res.status(401).json({
-        message: "Please Login...!",
-        error: true,
-        success: false
-      });
-    }
-
-    jwt.verify(token, process.env.TOKEN_SECRET_KEY, (err, decoded) => {
-      if (err) {
-        console.error("Error verifying token:", err);
-        return res.status(403).json({
-          message: "Invalid or expired token.",
-          error: true,
-          success: false
+function verifyToken(token, secret) {
+    return new Promise((resolve, reject) => {
+        jwt.verify(token, secret, (err, decoded) => {
+            if (err) {
+                reject(err);  
+            } else {
+                resolve(decoded); 
+            }
         });
-      }
-
-      req.userId = decoded?._id;
-      console.log("Decoded token:", decoded);
-
-      next();
     });
-  } catch (err) {
-    console.error("Unexpected error:", err);
-    res.status(500).json({
-      message: "Internal server error.",
-      error: true,
-      success: false
-    });
-  }
+}
+
+async function authToken(req, res, next) {
+    try {
+        const token = req.cookies?.token;
+
+        console.log("Extracted Token:", token);
+
+        if (!token) {
+            return res.status(401).json({
+                message: "Authentication required. Please login.",
+                error: true,
+                success: false
+            });
+        }
+
+        const decoded = await verifyToken(token, process.env.TOKEN_SECRET_KEY);
+
+        console.log("Decoded Token:", decoded);
+
+        req.userId = decoded._id;
+        
+        next();  
+
+    } catch (err) {
+        console.error("Authentication Error:", err);
+
+        let message = "An error occurred during authentication.";
+        let statusCode = 400;
+
+        if (err.name === "JsonWebTokenError") {
+            message = "Invalid token.";
+            statusCode = 401;
+        } else if (err.name === "TokenExpiredError") {
+            message = "Token has expired.";
+            statusCode = 401;
+        }
+
+        res.status(statusCode).json({
+            message,
+            error: true,
+            success: false
+        });
+    }
 }
 
 module.exports = authToken;

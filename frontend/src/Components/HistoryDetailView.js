@@ -9,7 +9,7 @@ const HistoryDetailView = ({
   fetchData = () => {},
   productDetails = {},
 }) => {
-  const [data, setData] = useState({
+  const [data] = useState({
     _id: productDetails?._id || "",
     Image: productDetails?.Image || [],
     totalAmount: productDetails?.totalAmount || "",
@@ -19,13 +19,6 @@ const HistoryDetailView = ({
   const [openFullScreenImage, setOpenFullScreenImage] = useState(false);
   const [fullScreenImage, setFullScreenImage] = useState("");
 
-  const handleOnChange = (e) => {
-    const { name, value } = e.target;
-    setData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();

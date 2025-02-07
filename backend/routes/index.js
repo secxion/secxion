@@ -26,6 +26,7 @@ const UserUploadMarketController = require('../controller/product/userUploadMark
 const getMarketController = require('../controller/product/getUserMarket')
 const marketRecordController = require('../controller/product/marketRecord')
 const { validateFilterProducts } = require('../middleware/validators')
+const authMiddleware = require('../middleware/authMiddleware')
 
 
 
@@ -57,7 +58,7 @@ router.post("/delete-cart-product",authToken,deleteAddToCartProduct)
 
 //user market
 router.post("/upload-market",authToken,UserUploadMarketController)
-router.get("/get-market",getMarketController)
+router.get("/get-market",authToken, getMarketController)
 router.post("/market-record",authToken,marketRecordController)
 
 

@@ -1,5 +1,4 @@
 import React, { useContext, useState, useEffect } from "react";
-import loginicons from "./pfpik.gif";
 import { Link, useNavigate } from "react-router-dom";
 import SummaryApi from "../common";
 import { toast } from "react-toastify";
@@ -9,17 +8,14 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(true);
   const [formSubmitting, setFormSubmitting] = useState(false);
-  const [data, setData] = useState({
-    email: "",
-    password: "",
-  });
+  const [data, setData] = useState({ email: "", password: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
-  const { fetchUserDetails, isLoggedIn } = useContext(Context);
+  const { fetchUserDetails, fetchUserAddToCart, isLoggedIn } = useContext(Context);
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate("home");
+      navigate("/");
     } else {
       setLoading(false);
     }
@@ -27,10 +23,7 @@ const Login = () => {
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
-    setData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -41,10 +34,8 @@ const Login = () => {
     try {
       const response = await fetch(SummaryApi.signIn.url, {
         method: SummaryApi.signIn.method,
-        credentials: "include", 
-        headers: {
-          "Content-Type": "application/json",
-        },
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
@@ -52,15 +43,15 @@ const Login = () => {
 
       if (result.success) {
         toast.success(result.message);
-        fetchUserDetails(); 
-        navigate("/"); 
+        fetchUserDetails();
+        fetchUserAddToCart();
+        navigate("/");
       } else {
         setErrorMessage(result.message || "Invalid credentials. Please try again.");
         toast.error(result.message);
       }
     } catch (error) {
       setErrorMessage("An unexpected error occurred. Please try again.");
-      toast.error("Something went wrong. Please try again later.");
     } finally {
       setFormSubmitting(false);
     }
@@ -75,13 +66,13 @@ const Login = () => {
   }
 
   return (
-    <section
-      id="login"
-      className="min-h-screen bg-gradient-to-r from-blue-500 via-yellow-500 to-red-500 flex items-center justify-center"
-    >
-      <div className="bg-white p-6 w-full max-w-md rounded-2xl shadow-lg">
-        <div className="w-20 h-20 mx-auto overflow-hidden rounded-full bg-gray-200">
-          <img src={loginicons} alt="Login Icon" />
+    <section id="login" className="min-h-screen bg-gradient-to-r from-blue-500 via-yellow-500 to-red-500 flex items-center justify-center">
+      <div className="bg-[#F5F5DC] p-6 w-full max-w-md rounded-2xl shadow-lg"> 
+        <div className="w-20 h-20 mx-auto overflow-hidden rounded-full bg-gray-200 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="50" fill="#D8CBAF" /> 
+            <text x="50%" y="50%" textAnchor="middle" fill="#4A4A4A" fontSize="40" fontWeight="bold" dy=".3em">S</text> 
+          </svg>
         </div>
 
         <form className="pt-6 flex flex-col gap-4" onSubmit={handleSubmit}>
@@ -120,10 +111,7 @@ const Login = () => {
                 {showPassword ? "🙈" : "👁️"}
               </button>
             </div>
-            <Link
-              to="/reset"
-              className="block text-right text-sm text-red-600 hover:underline mt-1"
-            >
+            <Link to="/reset" className="block text-right text-sm text-red-600 hover:underline mt-1">
               Forgot password?
             </Link>
           </div>
@@ -143,10 +131,7 @@ const Login = () => {
 
         <p className="mt-6 text-center text-gray-600">
           Don't have an account?{" "}
-          <Link
-            to="/sign-up"
-            className="text-blue-500 hover:underline hover:text-blue-700"
-          >
+          <Link to="/sign-up" className="text-blue-500 hover:underline hover:text-blue-700">
             Sign up
           </Link>
         </p>

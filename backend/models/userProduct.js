@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 
 const userProductSchema = mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",       
+      required: true
+    },
     Image: [String],
     totalAmount: Number,
     userRemark: String,
