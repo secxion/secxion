@@ -22,11 +22,25 @@ const userProductSchema = mongoose.Schema(
           {
             faceValue: String,
             sellingPrice: Number,
+            description: { type: String, default: "" }, 
           },
         ],
       },
     ],
     timestamp: { type: Date, default: Date.now },
+    status: { 
+      type: String,
+      enum: ['DONE', 'CANCEL'], 
+      default: null 
+    },
+    cancelReason: { 
+      type: String,
+      default: null 
+    },
+    crImage: { 
+      type: [String],
+      default: null 
+    }
   },
   {
     timestamps: true,

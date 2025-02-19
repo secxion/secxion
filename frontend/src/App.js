@@ -30,7 +30,7 @@ function App() {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          setUser(data.data); // Set user state
+          setUser(data.data); 
           dispatch(setUserDetails(data.data));
         } else {
           setUser(null);
@@ -91,7 +91,7 @@ function App() {
   }
 
   return (
-    <Context.Provider value={{ fetchUserDetails, fetchMarketData, marketData, user }}> {/* Include user in context */}
+    <Context.Provider value={{ fetchUserDetails, fetchMarketData, marketData, user }}>
       <Header />
       <main className="min-h-[calc(100vh-120px)] pt-16">
         <Outlet />

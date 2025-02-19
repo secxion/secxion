@@ -2,7 +2,7 @@ import React from 'react'
 
 const Notification = () => {
   return (
-    <div>Notification</div>
+    <div className='container glass-card card-grid p-24 bg-white'></div>
   )
 }
 

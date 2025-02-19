@@ -49,6 +49,14 @@ const SummaryApi = {
         url : `${backendDomain}/api/get-market`,
         method : 'get'
     },
+    allUserMarkets : {
+        url : `${backendDomain}/api/get-all-users-market`,
+        method : 'get'
+    },
+    updateMarketStatus : {
+        url : `${backendDomain}/api/update-market-status`,
+        method : 'post'
+    },
     categoryProduct : {
         url : `${backendDomain}/api/get-categoryProduct`,
         method : 'get'

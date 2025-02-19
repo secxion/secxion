@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { setUserDetails } from "../store/userSlice";
 import Context from "../Context";
 import ROLE from "../common/role";
+import Net from "./Net";
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -89,7 +90,6 @@ const Header = () => {
             </Link>
           </div>
         )}
-
         {user?._id && (
           <div className="hidden md:flex items-center w-full max-w-sm relative">
             <input

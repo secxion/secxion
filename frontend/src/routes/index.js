@@ -21,6 +21,8 @@ import RedirectIfLoggedIn from "../Components/RedirectIfLoggedIn";
 import ProtectedRoute from "../Components/ProtectedRoute";
 import UserUploadMarket from "../Components/UserUploadMarket";
 import UserMarket from "../pages/UserMarket";
+import Net from "../Components/Net";
+import UsersMarket from "../pages/UsersMarket";
 
 const publicRoutes = [
   {
@@ -35,6 +37,10 @@ const publicRoutes = [
     path: "reset",
     element: <Reset />,
   },
+  {
+    path:"system-blog",
+    element: <Net />
+  }
 ];
 
 const protectedRoutes = [
@@ -47,6 +53,7 @@ const protectedRoutes = [
   { path: "product/:id", element: <ProductDetails /> },
   { path: "cart", element: <Cart /> },
   { path: "search", element: <SearchProduct /> },
+
   { path: "wallet", element: <Wallet /> },
   { path: "notifications", element: <Notification /> },
   { path: "profile", element: <Profile /> },
@@ -56,6 +63,8 @@ const protectedRoutes = [
 const adminRoutes = [
   { path: "all-users", element: <AllUsers /> },
   { path: "all-products", element: <AllProducts /> },
+  { path: "users-market", element: <UsersMarket /> },
+
 ];
 
 const router = createBrowserRouter([

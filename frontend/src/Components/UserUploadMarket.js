@@ -26,6 +26,8 @@ const UserUploadMarket = ({
     pricing: Array.isArray(productDetails.pricing) ? productDetails.pricing : [],
   });
 
+  const [selectedRate, setSelectedRate] = useState(0); 
+
   useEffect(() => {
     console.log("Received productDetails:", productDetails);
   
@@ -46,6 +48,10 @@ const UserUploadMarket = ({
           }]
         : [],
     }));
+
+    if (productDetails.rate) {
+      setSelectedRate(productDetails.rate);
+    }
   }, [productDetails]);
   
   const [openFullScreenImage, setOpenFullScreenImage] = useState(false);
@@ -57,6 +63,12 @@ const UserUploadMarket = ({
       ...prev,
       [name]: value,
     }));
+  };
+
+  const calculateTotalAmount = (enteredAmount) => {
+    const amount = parseFloat(enteredAmount) || 0; 
+    const total = amount * selectedRate; 
+    return total; 
   };
 
   const handleUploadImage = async (e) => {
@@ -187,7 +199,7 @@ const UserUploadMarket = ({
             </div>
           </div>
           <div>
-            <label htmlFor='totalAmount' className='block font-medium text-gray-700 mb-2'>Total Amount:</label>
+            <label htmlFor='totalAmount' className='block font-medium text-gray-700 mb-2'>Enter Total Value:</label>
             <input
               type='number'
               id='totalAmount'
@@ -197,6 +209,12 @@ const UserUploadMarket = ({
               className='w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring focus:ring-blue-300 shadow-sm'
               required
             />
+          </div>
+          <div className='mt-4'>
+            <label className='block font-medium text-gray-700 mb-2'> Total Amount:</label>
+            <div className='p-3 border rounded-lg bg-gray-50'>
+              {calculateTotalAmount(data.totalAmount)}
+            </div>
           </div>
           <div>
             <label htmlFor='userRemark' className='block font-medium text-gray-700 mb-2'>Remarks:</label>

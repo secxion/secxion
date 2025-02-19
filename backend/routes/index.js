@@ -27,8 +27,7 @@ const getMarketController = require('../controller/product/getUserMarket')
 const marketRecordController = require('../controller/product/marketRecord')
 const { validateFilterProducts } = require('../middleware/validators')
 const authMiddleware = require('../middleware/authMiddleware')
-
-
+const { getAllUserMarkets, updateMarketStatus } = require('../controller/product/userMarketController')
 
 router.post("/signup", userSignUpController)
 router.post("/signin",userSignInController)
@@ -38,6 +37,9 @@ router.get("/userLogout",userLogout)
 //admin panel
 router.get("/all-user",authToken,allUsers)
 router.post("/update-user",authToken,updateUser)
+router.get("/get-all-users-market",authToken, getAllUserMarkets)
+router.post("/update-market-status/:id", updateMarketStatus)
+
 
 //product
 router.post("/upload-product",authToken,UploadProductController)
@@ -60,6 +62,7 @@ router.post("/delete-cart-product",authToken,deleteAddToCartProduct)
 router.post("/upload-market",authToken,UserUploadMarketController)
 router.get("/get-market",authToken, getMarketController)
 router.post("/market-record",authToken,marketRecordController)
+
 
 
 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { CgClose } from "react-icons/cg";
 import productCategory from "../helpers/productCategory";
-import currencyData from "../helpers/currencyData"; // Ensure this file exists and is imported
+import currencyData from "../helpers/currencyData";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import uploadImage from "../helpers/uploadImage";
 import DisplayImage from "./DisplayImage";
@@ -11,7 +11,7 @@ import { toast } from "react-toastify";
 
 const AdminEditProduct = ({ onClose, productData, fetchdata }) => {
   const [data, setData] = useState({
-    _id: productData?._id || "", // Include _id in the state
+    _id: productData?._id || "",
     productName: productData?.productName || "",
     brandName: productData?.brandName || "",
     category: productData?.category || "",
@@ -52,7 +52,11 @@ const AdminEditProduct = ({ onClose, productData, fetchdata }) => {
 
   const handleAddFaceValue = (index) => {
     const updatedPricing = [...data.pricing];
-    updatedPricing[index].faceValues.push({ faceValue: "", sellingPrice: "" });
+    updatedPricing[index].faceValues.push({
+      faceValue: "",
+      sellingPrice: "",
+      description: "",
+    });
     setData((prev) => ({ ...prev, pricing: updatedPricing }));
   };
 
@@ -78,16 +82,15 @@ const AdminEditProduct = ({ onClose, productData, fetchdata }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitting Data:", data); // Debugging line
-
     const transformedData = {
       ...data,
       pricing: data.pricing.map((currency) => ({
         ...currency,
         faceValues: currency.faceValues.map((fv) => ({
           ...fv,
-          faceValue: parseFloat(fv.faceValue),
-          sellingPrice: parseFloat(fv.sellingPrice),
+          faceValue: parseFloat(fv.faceValue) || 0,
+          sellingPrice: parseFloat(fv.sellingPrice) || 0,
+          description: parseFloat(fv.description) || "",
         })),
       })),
     };
@@ -105,7 +108,6 @@ const AdminEditProduct = ({ onClose, productData, fetchdata }) => {
     });
 
     const responseData = await response.json();
-    console.log("Response:", responseData); // Debugging line
 
     if (responseData.success) {
       toast.success(responseData?.message);
@@ -117,15 +119,13 @@ const AdminEditProduct = ({ onClose, productData, fetchdata }) => {
       toast.error(responseData?.message);
     }
   };
+
   return (
     <div className="fixed w-full h-full bg-slate-200 bg-opacity-35 top-0 left-0 right-0 bottom-0 flex justify-center items-center">
       <div className="bg-white p-4 rounded w-full max-w-2xl h-full max-h-[80%] overflow-hidden">
         <div className="flex justify-between items-center pb-3">
           <h2 className="font-bold text-lg">Edit Product</h2>
-          <div
-            className="w-fit ml-auto text-2xl hover:text-red-600 cursor-pointer"
-            onClick={onClose}
-          >
+          <div className="w-fit ml-auto text-2xl hover:text-red-600 cursor-pointer" onClick={onClose}>
             <CgClose />
           </div>
         </div>
@@ -210,7 +210,9 @@ const AdminEditProduct = ({ onClose, productData, fetchdata }) => {
             <div key={currencyIndex} className="border p-2 mb-2 rounded">
               <select
                 value={currency.currency}
-                onChange={(e) => handleUpdatePricing(currencyIndex, undefined, "currency", e.target.value)}
+                onChange={(e) =>
+                  handleUpdatePricing(currencyIndex, undefined, "currency", e.target.value)
+                }
                 className="p-2 bg-slate-100 border rounded"
               >
                 <option value="">Select Currency</option>
@@ -238,6 +240,15 @@ const AdminEditProduct = ({ onClose, productData, fetchdata }) => {
                     value={faceValue.sellingPrice}
                     onChange={(e) =>
                       handleUpdatePricing(currencyIndex, faceValueIndex, "sellingPrice", e.target.value)
+                    }
+                    className="p-2 bg-slate-100 border rounded flex-1"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Description"
+                    value={faceValue.description}
+                    onChange={(e) =>
+                      handleUpdatePricing(currencyIndex, faceValueIndex, "description", e.target.value)
                     }
                     className="p-2 bg-slate-100 border rounded flex-1"
                   />

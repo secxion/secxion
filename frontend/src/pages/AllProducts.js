@@ -27,7 +27,7 @@ const AllProducts = () => {
   return (
     <div className="container mx-auto p-4">
       <header className="bg-white py-2 px-4 flex justify-between items-center shadow-md rounded">
-        <h2 className="font-bold text-lg">All Products</h2>
+        <h2 className="font-bold text-lg">Products</h2>
         <button
           className="border-2 border-purple-900 text-black hover:bg-purple-800 hover:text-white transition-all py-1 px-3 rounded"
           onClick={() => setOpenUploadProduct(true)}
@@ -43,7 +43,7 @@ const AllProducts = () => {
             <AdminProductCard data={product} key={index} fetchdata={fetchAllProduct} />
           ))
         ) : (
-          <p className="text-center w-full">No products available.</p>
+          <p className="text-center w-full">No Market.</p>
         )}
       </main>
 
