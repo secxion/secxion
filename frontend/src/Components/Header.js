@@ -1,4 +1,4 @@
-import React, { useContext, useState, useMemo } from "react";
+import React, { useContext, useState, useMemo, useCallback, useEffect } from "react";
 import { FcSearch } from "react-icons/fc";
 import { PiUserSquare } from "react-icons/pi";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -8,33 +8,57 @@ import { toast } from "react-toastify";
 import { setUserDetails } from "../store/userSlice";
 import Context from "../Context";
 import ROLE from "../common/role";
-import Net from "./Net";
+
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
 
 const Header = () => {
   const dispatch = useDispatch();
   const [menuDisplay, setMenuDisplay] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchPanelOpen, setSearchPanelOpen] = useState(false);
-  const user = useSelector((state) => state?.user?.user);
-  const context = useContext(Context); 
+  const [loading, setLoading] = useState(false);
+  const { user } = useSelector((state) => state.user);
+  const { token } = useContext(Context);
   const navigate = useNavigate();
   const searchInput = useLocation();
-  
+
   const searchQuery = useMemo(() => {
-    const URLSearch = new URLSearchParams(searchInput?.search);
+    const URLSearch = new URLSearchParams(searchInput.search);
     return URLSearch.get("q") || "";
   }, [searchInput]);
 
   const [search, setSearch] = useState(searchQuery);
+  const debouncedSearch = useDebounce(search, 300); 
 
-  const handleLogout = async () => {
+  useEffect(() => {
+    if (debouncedSearch.trim()) {
+      navigate(`/search?q=${encodeURIComponent(debouncedSearch)}`);
+    } 
+  }, [debouncedSearch, navigate]);
+  
+  const handleLogout = useCallback(async () => {
+    setLoading(true);
     try {
       const response = await fetch(SummaryApi.logout_user.url, {
         method: SummaryApi.logout_user.method,
         credentials: "include",
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${context.token}`
+          'Authorization': `Bearer ${token}`
         }
       });
       const data = await response.json();
@@ -48,28 +72,18 @@ const Header = () => {
       }
     } catch (error) {
       toast.error("Logout failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [dispatch, navigate, token]);
 
-  const handleSearch = (e) => {
-    const { value } = e.target;
-    setSearch(value);
-
-    if (value.trim()) {
-      navigate(`/search?q=${encodeURIComponent(value)}`); 
-    } else {
-      navigate("/search");
-    }
-  };
-
-  const toggleMenuDisplay = () => setMenuDisplay((prev) => !prev);
-  const toggleSidebarOpen = () => setSidebarOpen((prev) => !prev);
-  const toggleSearchPanelOpen = () => setSearchPanelOpen((prev) => !prev);
+  const toggleMenuDisplay = useCallback(() => setMenuDisplay(prev => !prev), []);
+  const toggleSidebarOpen = useCallback(() => setSidebarOpen(prev => !prev), []);
+  const toggleSearchPanelOpen = useCallback(() => setSearchPanelOpen(prev => !prev), []);
 
   return (
-    <nav className="h-14 shadow-lg bg-gradient-to-r from-gray-200 to-gray-300 fixed w-full z-50 border-b-2 border-gray-400">
+    <nav className="h-16 bg-white shadow-lg fixed w-full z-50 border-b-2 border-gray-400 transition-all duration-300">
       <div className="h-full container mx-auto flex items-center justify-between px-4">
-
         {user?._id && (
           <div className="flex items-center flex-shrink-0">
             <Link to="/">
@@ -95,8 +109,8 @@ const Header = () => {
             <input
               type="text"
               placeholder="Search Trade..."
-              className="w-full px-3 py-2 rounded-full outline-none focus:ring-2 focus:ring-blue-700 bg-gray-100 border border-gray-300 shadow-md"
-              onChange={handleSearch}
+              className="w-full px-4 py-2 rounded-full outline-none focus:ring-2 focus:ring-blue-700 bg-gray-100 border border-gray-300 shadow-md transition duration-300"
+              onChange={(e) => setSearch(e.target.value)}
               value={search}
             />
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer">
@@ -108,7 +122,7 @@ const Header = () => {
         <div className="flex items-center gap-6">
           {user?._id && (
             <div className="relative">
-              <div className="cursor-pointer" onClick={toggleMenuDisplay}>
+              <div className="cursor-pointer" onClick={toggleMenuDisplay} aria-expanded={menuDisplay}>
                 {user?.profilePic ? (
                   <img
                     src={user?.profilePic}
@@ -144,8 +158,9 @@ const Header = () => {
                       toggleMenuDisplay();
                     }}
                     className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                    disabled={loading}
                   >
-                    Logout
+                    {loading ? "Logging out..." : "Logout"}
                   </button>
                 </div>
               )}
@@ -158,6 +173,7 @@ const Header = () => {
               className="hidden md:flex items-center justify-center bg-transparent group"
               title="Logout"
               aria-label="Logout"
+              disabled={loading}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -214,8 +230,8 @@ const Header = () => {
             <input
               type="text"
               placeholder="Search Trade..."
-              className="w-full px-3 py-2 rounded-full outline-none focus:ring-2 focus:ring-blue-700 bg-gray-100 border border-gray-300 shadow-md"
-              onChange={handleSearch}
+              className="w-full px-4 py-2 rounded-full outline-none focus:ring-2 focus:ring-blue-700 bg-gray-100 border border-gray-300 shadow-md transition duration-300"
+              onChange={(e) => setSearch(e.target.value)}
               value={search}
             />
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer">
@@ -226,11 +242,11 @@ const Header = () => {
       )}
 
       {sidebarOpen && user?._id && (
-        <div className="fixed top-0 left-0 w-3/4 h-full bg-gray-200 z-50 border-r border-gray-400">
-          <div className="p-4">
+        <div className="fixed top-0 left-0 w-3/4 h-full bg-white z-50 border-r border-gray-400 transition-transform transform translate-x-0 shadow-lg">
+          <div className="p-6">
             <button
               onClick={toggleSidebarOpen}
-              className="text-gray-700 text-2xl"
+              className="text-gray-700 text-2xl mb-4"
               aria-label="Close menu"
             >
               ✕
@@ -238,26 +254,20 @@ const Header = () => {
             <nav className="mt-4">
               <Link
                 to="/home"
-                className="block text-gray-700 py-2 hover:bg-gray-100"
+                className="block text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition duration-200"
                 onClick={toggleSidebarOpen}
               >
                 Home
-              </Link>
-              <Link
-                to="/cart"
-                className="block text-gray-700 py-2 hover:bg-gray-100"
-                onClick={toggleSidebarOpen}
-              >
-                Cart
               </Link>
               <button
                 onClick={() => {
                   handleLogout();
                   toggleSidebarOpen();
                 }}
-                className="block text-gray-700 py-2 text-left w-full hover:bg-gray-100"
+                className="block text-gray-700 py-3 px-4 rounded-lg text-left w-full hover:bg-gray-200 transition duration-200"
+                disabled={loading}
               >
-                Logout
+                {loading ? "Logging out..." : "Logout"}
               </button>
             </nav>
           </div>

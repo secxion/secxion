@@ -14,11 +14,14 @@ const HistoryDetailView = ({
     Image: productDetails?.Image || [],
     totalAmount: productDetails?.totalAmount || "",
     userRemark: productDetails?.userRemark || "",
+    crImage: productDetails?.crImage || "", 
+    status: productDetails?.status || "WAIT",
+    cancelReason: productDetails?.cancelReason || "",
   });
 
   const [openFullScreenImage, setOpenFullScreenImage] = useState(false);
   const [fullScreenImage, setFullScreenImage] = useState("");
-
+  const [openFullScreenCrImage, setOpenFullScreenCrImage] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -111,20 +114,50 @@ const HistoryDetailView = ({
             <div>{productDetails.totalAmount}</div>
           </div>
 
-          {/* Remarks Field */}
           <div>
             <label htmlFor="userRemark" className="block font-medium text-gray-700 mb-2">Remarks:</label>
             <div>{productDetails.userRemark}</div>
           </div>
 
-         
+          {productDetails.crImage && (
+            <div>
+              <label className="block font-medium text-gray-700 mb-2">Cancel Reason Image:</label>
+              <img 
+                src={productDetails.crImage} 
+                alt="Cancel Reason" 
+                className="w-20 h-20 object-cover rounded-lg border cursor-pointer" 
+                onClick={() => {
+                  setOpenFullScreenCrImage(true);
+                  setFullScreenImage(productDetails.crImage);
+                }} 
+              />
+            </div>
+          )}
+
+          <div>
+            <label className="block font-medium text-gray-700 mb-2">Status:</label>
+            <div>{data.status || 'N/A'}</div>
+          </div>
+
+          {data.status === "CANCELLED" && (
+            <div>
+              <label className="block font-medium text-gray-700 mb-2">Cancel Reason:</label>
+              <div>{data.cancelReason || 'N/A'}</div>
+            </div>
+          )}
         </form>
       </div>
 
-      {/* Fullscreen Image Display */}
       {openFullScreenImage && (
         <DisplayImage
           onClose={() => setOpenFullScreenImage(false)}
+          imgUrl={fullScreenImage}
+        />
+      )}
+
+      {openFullScreenCrImage && (
+        <DisplayImage
+          onClose={() => setOpenFullScreenCrImage(false)}
           imgUrl={fullScreenImage}
         />
       )}

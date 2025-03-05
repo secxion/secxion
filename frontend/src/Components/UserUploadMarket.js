@@ -208,12 +208,13 @@ const UserUploadMarket = ({
               onChange={handleOnChange}
               className='w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring focus:ring-blue-300 shadow-sm'
               required
+              placeholder="Enter amount here"
             />
           </div>
           <div className='mt-4'>
-            <label className='block font-medium text-gray-700 mb-2'> Total Amount:</label>
-            <div className='p-3 border rounded-lg bg-gray-50'>
-              {calculateTotalAmount(data.totalAmount)}
+            <label className='block font-medium text-gray-700 mb-2'>Calculated Total Amount:</label>
+            <div className='p-3 border rounded-lg bg-gray-50 text-gray-800 font-semibold'>
+              {calculateTotalAmount(data.totalAmount).toFixed(2)}
             </div>
           </div>
           <div>

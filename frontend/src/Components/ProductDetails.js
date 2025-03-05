@@ -19,10 +19,10 @@ const ProductDetails = () => {
   const [selectedFaceValue, setSelectedFaceValue] = useState(null);
   const [error, setError] = useState(null);
 
-  const params = useParams();
+  const { id } = useParams();
 
   useEffect(() => {
-    if (!params?.id) return;
+    if (!id) return;
 
     const fetchProductDetails = async () => {
       setLoading(true);
@@ -31,11 +31,9 @@ const ProductDetails = () => {
         const response = await fetch(SummaryApi.productDetails.url, {
           method: SummaryApi.productDetails.method,
           headers: {
-            "content-type": "application/json",
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            productId: params.id,
-          }),
+          body: JSON.stringify({ productId: id }),
         });
 
         if (!response.ok) throw new Error("Failed to fetch product details");
@@ -46,12 +44,13 @@ const ProductDetails = () => {
       } catch (error) {
         console.error("Error fetching product details:", error);
         setError("Failed to fetch product details. Please try again later.");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchProductDetails();
-  }, [params?.id]);
+  }, [id]);
 
   const handleCurrencyChange = (currency) => {
     const selectedCurrency = data.pricing.find(item => item.currency === currency);
@@ -72,7 +71,6 @@ const ProductDetails = () => {
             {loading ? (
               <div className="animate-pulse flex flex-col gap-4">
                 <p className="bg-slate-200 h-6 rounded-full w-1/2"></p>
-                <h2 className="bg-slate-200 h-8 rounded-full w-3/4"> </h2>
                 <p className="bg-slate-200 h-6 rounded-full w-1/3"></p>
               </div>
             ) : error ? (
@@ -83,7 +81,6 @@ const ProductDetails = () => {
                 <h2 className="text-3xl font-semibold">{data?.productName}</h2>
                 <p className="text-lg text-gray-300">{data?.category}</p>
 
-                {/* Currency Selection Section */}
                 <div className="mt-8">
                   <div className="flex overflow-x-auto space-x-4 scrollbar-hide">
                     {data?.pricing?.map((currency) => {
@@ -101,7 +98,6 @@ const ProductDetails = () => {
                   </div>
                 </div>
 
-                {/* Face Values for Selected Currency */}
                 {activeCurrency && (
                   <div className="mt-6 max-h-[300px] overflow-y-auto">
                     <table className="min-w-full table-auto bg-white shadow-lg rounded-lg overflow-hidden text-gray-800">
@@ -137,7 +133,6 @@ const ProductDetails = () => {
         </div>
       </div>
 
-      {/* User Upload Market Form */}
       {showUploadForm && selectedFaceValue && (
         <UserUploadMarket
           onClose={() => setShowUploadForm(false)}

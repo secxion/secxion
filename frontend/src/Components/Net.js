@@ -1,9 +1,35 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react';
+import './Net.css'; 
 
-const Net = () => {
+const Net = ({ blogs }) => {
+  const [systemBlogs, setSystemBlogs] = useState([]);
+
+  useEffect(() => {
+    // Combine blogs with a duplicate for continuous scrolling effect
+    setSystemBlogs([...blogs, ...blogs]); 
+  }, [blogs]);
+
   return (
-    <div className='neon2-text flex-container p-0.5 top-0 bottom-0 text-sm bg-white '>system blog:</div>
-  )
-}
+    <div className='net-container'>
+      <div className='net-label'>
+        <span className='label'>🤖 Blog:</span>
+      </div>
+      <div className='blog-wrapper'>
+        <div className='blog-content'>
+          {systemBlogs.length > 0 ? (
+            systemBlogs.map((blog, index) => (
+              <div key={index} className='blog-item'>
+                <strong className='blog-title'>{blog.title} 🚀</strong>: 
+                <span className='blog-text'>{blog.content}</span>
+              </div>
+            ))
+          ) : (
+            <span className='loading-text'>🔄 Fetching latest system updates...</span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
-export default Net
+export default Net;

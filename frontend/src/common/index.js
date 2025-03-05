@@ -28,11 +28,13 @@ const SummaryApi = {
     uploadProduct : {
         url : `${backendDomain}/api/upload-product`,
         method : 'post'
-    },    
+    },
+    
     allProduct : {
         url : `${backendDomain}/api/get-product`,
         method : 'get'
     },
+    
     updateProduct : {
         url : `${backendDomain}/api/update-product`,
         method : 'post'
@@ -57,6 +59,10 @@ const SummaryApi = {
         url : `${backendDomain}/api/update-market-status`,
         method : 'post'
     },
+    createNotification : {
+        url : `${backendDomain}/api/create-notification`,
+        method : 'post'
+    },
     categoryProduct : {
         url : `${backendDomain}/api/get-categoryProduct`,
         method : 'get'
@@ -69,26 +75,6 @@ const SummaryApi = {
         url : `${backendDomain}/api/product-details`,
         method : 'post'
     },
-    addToCartProduct : {
-        url : `${backendDomain}/api/addtocart`,
-        method : 'post'
-    },
-    addToCartProductCount : {
-        url : `${backendDomain}/api/countAddToCartProduct`,
-        method : 'get'
-    },
-    addToCartViewProduct : {
-        url : `${backendDomain}/api/view-card-product`,
-        method : 'get'
-    },
-    updateCartProduct : {
-        url : `${backendDomain}/api/update-cart-product`,
-        method : 'post'
-    },
-    deleteCartProduct : {
-        url : `${backendDomain}/api/delete-cart-product`,
-        method : 'post'        
-    },
     searchProduct : {
         url : `${backendDomain}/api/search`,
         method : 'get'
@@ -96,8 +82,24 @@ const SummaryApi = {
     filterProduct : {
         url : `${backendDomain}/api/filter-product`,
         method : 'post'
-    }
+    },
+    createBlog : {
+        url : `${backendDomain}/api/create-blog`,
+        method : 'post'
+    },
+    getBlogs : {
+        url : `${backendDomain}/api/get-blogs`,
+        method : 'get'
+    },
+    updateBlog : {
+        url : `${backendDomain}/api/update-blog`,
+        method : 'put'
+    },
+    deleteBlog : {
+        url : `${backendDomain}/api/delete-blog`,
+        method : 'delete'
+    },
+   
 }
-
 
 export default SummaryApi

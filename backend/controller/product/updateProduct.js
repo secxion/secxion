@@ -13,11 +13,10 @@ async function updateProductController(req, res) {
       throw new Error("Product ID (_id) is required");
     }
 
-    // Update product and return the updated document
     const updatedProduct = await productModel.findByIdAndUpdate(
       _id,
       resBody,
-      { new: true, runValidators: true } // Ensure updated document is returned and validations are run
+      { new: true, runValidators: true } 
     );
 
     if (!updatedProduct) {

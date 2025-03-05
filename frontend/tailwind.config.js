@@ -6,7 +6,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        "cream-white": "#f5f5f1", // Soft cream-white color
+        "cream-white": "#f5f5f1",
       },
     },
   },

@@ -32,10 +32,8 @@ async function userSignInController(req, res) {
         sameSite: 'Strict',
       };
 
-      // ✅ Set HTTP-only cookie
       res.cookie("token", token, tokenOptions);
 
-      // ✅ ALSO return the token in the response body
       res.status(200).json({
         message: "Login successful",
         data: { token },

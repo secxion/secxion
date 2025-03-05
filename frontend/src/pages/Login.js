@@ -11,7 +11,7 @@ const Login = () => {
   const [data, setData] = useState({ email: "", password: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
-  const { fetchUserDetails, fetchUserAddToCart, isLoggedIn } = useContext(Context);
+  const { fetchUserDetails, isLoggedIn } = useContext(Context);
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -44,7 +44,6 @@ const Login = () => {
       if (result.success) {
         toast.success(result.message);
         fetchUserDetails();
-        fetchUserAddToCart();
         navigate("/");
       } else {
         setErrorMessage(result.message || "Invalid credentials. Please try again.");
@@ -66,7 +65,7 @@ const Login = () => {
   }
 
   return (
-    <section id="login" className="min-h-screen bg-gradient-to-r from-blue-500 via-yellow-500 to-red-500 flex items-center justify-center">
+    <section id="login" className="min-h-screen bg-gradient-to-r from-blue-500 via-yellow-500 to-red-500 flex items-center justify-center overflow-hidden">
       <div className="bg-[#F5F5DC] p-6 w-full max-w-md rounded-2xl shadow-lg"> 
         <div className="w-20 h-20 mx-auto overflow-hidden rounded-full bg-gray-200 flex items-center justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20" viewBox="0 0 100 100">
@@ -116,7 +115,7 @@ const Login = () => {
             </Link>
           </div>
 
-          <button
+          <button 
             type="submit"
             className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-full transition transform hover:scale-105 disabled:opacity-50"
             disabled={formSubmitting}

@@ -70,6 +70,9 @@ const updateMarketStatus = async (req, res) => {
         } else if (status === 'DONE') {
             updateData.cancelReason = null; 
             updateData.crImage = null; 
+        } else if (status === 'PROCESSING') {
+            updateData.cancelReason = null; 
+            updateData.crImage = null;
         }
 
         const updatedMarket = await userProduct.findByIdAndUpdate(id, updateData, { new: true });

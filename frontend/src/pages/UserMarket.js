@@ -39,14 +39,8 @@ const UserMarket = () => {
 
   return (
     <div>
-      <div className="bg-white py-2 px-4 flex justify-between items-center">
+      <div className="bg-cream py-2 px-4 flex justify-between items-center">
         <h2 className="font-bold text-lg">Record</h2>
-        <button
-          className="border-2 border-purple-900 text-black hover:bg-purple-800 hover:text-white transition-all py-1 px-3"
-          onClick={() => setOpenUploadProduct(true)}
-        >
-          Sell Gift Card
-        </button>
       </div>
 
       <div className="flex items-center flex-wrap gap-3 py-8 p-4 h-[calc(100vh-190px)] overflow-y-scroll">

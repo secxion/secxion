@@ -3,11 +3,15 @@ import SummaryApi from '../common';
 import UserContext from '../Context';
 import { toast } from 'react-toastify';
 import MarketCard from './MarketCard';
+import HistoryCard from './HistoryCard';
+import HistoryDetailView from './HistoryDetailView';
+import uploadImage from '../helpers/uploadImage';
 
 const UsersMarket = () => {
     const [userMarkets, setUserMarkets] = useState([]);
     const [cancelData, setCancelData] = useState({});
     const { user } = useContext(UserContext);
+    const [selectedMarket, setSelectedMarket] = useState(null);
 
     const fetchUserMarkets = useCallback(async () => {
         try {
@@ -37,7 +41,7 @@ const UsersMarket = () => {
 
     const updateMarketStatus = async (marketId, status) => {
         const { reason, image } = cancelData[marketId] || {};
-        const imageUrl = convertBase64ToBlobUrl(image);
+        const imageUrl = image; 
         try {
             const response = await fetch(`${SummaryApi.updateMarketStatus.url}/${marketId}`, {
                 method: 'POST',
@@ -45,14 +49,18 @@ const UsersMarket = () => {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${localStorage.getItem("token")}`
                 },
-                body: JSON.stringify({ status, cancelReason: reason, crImage: imageUrl }),
+                body: JSON.stringify({ 
+                    status, 
+                    cancelReason: status === 'CANCEL' ? reason : undefined, 
+                    crImage: status === 'CANCEL' ? imageUrl : undefined 
+                }),
             });
             const dataResponse = await response.json();
             if (dataResponse.success) {
                 toast.success(dataResponse.message);
-                fetchUserMarkets();
+                fetchUserMarkets(); 
                 setCancelData(prev => {
-                    const updatedData = { ...prev, [marketId]: { status, reason, image } };
+                    const updatedData = { ...prev, [marketId]: { status, reason, image: imageUrl } };
                     localStorage.setItem('marketStatus', JSON.stringify(updatedData));
                     return updatedData;
                 });
@@ -65,17 +73,14 @@ const UsersMarket = () => {
         }
     };
 
-    const handleImageUpload = (marketId, event) => {
+    const handleImageUpload = async (marketId, event) => {
         const file = event.target.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setCancelData(prev => ({
-                    ...prev,
-                    [marketId]: { ...prev[marketId], image: reader.result }
-                }));
-            };
-            reader.readAsDataURL(file);
+            const uploadedImage = await uploadImage(file);
+            setCancelData(prev => ({
+                ...prev,
+                [marketId]: { ...prev[marketId], image: uploadedImage.url }
+            }));
         }
     };
 
@@ -86,18 +91,8 @@ const UsersMarket = () => {
         }));
     };
 
-    const convertBase64ToBlobUrl = (base64String) => {
-        if (!base64String) return null;
-        const base64Index = base64String.indexOf(',') + 1;
-        const base64Data = base64String.substring(base64Index);
-        const byteCharacters = atob(base64Data);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'image/jpeg' });
-        return URL.createObjectURL(blob);
+    const handleMarketSelect = (market) => {
+        setSelectedMarket(market);
     };
 
     return (
@@ -117,6 +112,12 @@ const UsersMarket = () => {
                                 onClick={() => updateMarketStatus(market._id, 'DONE')}
                             >
                                 Done
+                            </button>
+                            <button
+                                className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 transition w-full"
+                                onClick={() => updateMarketStatus(market._id, 'PROCESSING')}
+                            >
+                                Processing
                             </button>
                             <input
                                 type="text"
@@ -162,19 +163,37 @@ const UsersMarket = () => {
                         {cancelData[market._id] && (
                             <div className="mt-4">
                                 <p><strong>Last Status:</strong> {cancelData[market._id].status}</p>
-                                <p><strong>Cancel Reason:</strong> {cancelData[market._id].reason || 'N/A'}</p>
-                                {cancelData[market._id].image && (
-                                    <img 
-                                        src={cancelData[market._id].image} 
-                                        alt="" 
-                                        className="mt-2 w-full h-auto border rounded" 
-                                    />
+                                {cancelData[market._id].status === 'CANCEL' && (
+                                    <>
+                                        <p><strong>Cancel Reason:</strong> {cancelData[market._id].reason || 'N/A'}</p>
+                                        {cancelData[market._id].image && (
+                                            <img 
+                                                src={cancelData[market._id].image} 
+                                                alt="" 
+                                                className="mt-2 w-full h-auto border rounded" 
+                                            />
+                                        )}
+                                    </>
                                 )}
                             </div>
                         )}
+                        <HistoryCard data={{ ...market, status: cancelData[market._id]?.status, cancelReason: cancelData[market._id]?.reason, crImage: cancelData[market._id]?.image }} />
+                        <button onClick={() => handleMarketSelect(market)} className="mt-4 bg-blue-500 text-white px-2 py-1 rounded">View Details</button>
                     </div>
-                )) : <p className="text-gray-500 text-center">No user markets found.</p>}
+                )) : <p className="text-gray-500 text-center">Loading...</p>}
             </div>
+            {selectedMarket && (
+                <HistoryDetailView 
+                    onClose={() => setSelectedMarket(null)} 
+                    fetchData={fetchUserMarkets} 
+                    productDetails={{ 
+                        ...selectedMarket, 
+                        status: cancelData[selectedMarket._id]?.status, 
+                        cancelReason: cancelData[selectedMarket._id]?.reason, 
+                        crImage: cancelData[selectedMarket._id]?.image 
+                    }} 
+                />
+            )}
         </div>
     );
 };

@@ -7,8 +7,8 @@ require('dotenv').config();
 const connectDB = require('./config/db');
 const router = require('./routes');
 const helmet = require("helmet");
-const morgan = require('morgan'); 
-const mysql = require('mysql2/promise'); 
+const morgan = require('morgan');
+const mysql = require('mysql2/promise');
 
 const app = express();
 
@@ -40,7 +40,6 @@ app.use(cookieParser());
 
 app.use(morgan('combined')); 
 
-// Database connection
 const dbConfig = {
     host: process.env.DB_HOST,
     user: process.env.DB_USER,

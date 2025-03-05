@@ -1,28 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import UploadProduct from "../Components/UploadProduct";
 import SummaryApi from "../common";
 import AdminProductCard from "../Components/AdminProductCard";
 
+const fetchAllProducts = async () => {
+  const response = await fetch(SummaryApi.allProduct.url);
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
+  }
+  const dataResponse = await response.json();
+  return dataResponse?.data || [];
+};
+
 const AllProducts = () => {
   const [openUploadProduct, setOpenUploadProduct] = useState(false);
-  const [allProduct, setAllProduct] = useState([]);
 
-  const fetchAllProduct = async () => {
-    try {
-      const response = await fetch(SummaryApi.allProduct.url);
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      const dataResponse = await response.json();
-      setAllProduct(dataResponse?.data || []);
-    } catch (error) {
-      console.error("Failed to fetch products:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchAllProduct();
-  }, []);
+  const { data: allProduct = [], isLoading, error, refetch } = useQuery({
+    queryKey: ["allProducts"],
+    queryFn: fetchAllProducts,
+    staleTime: 1000 * 60 * 5, 
+    retry: 2, 
+  });
 
   return (
     <div className="container mx-auto p-4">
@@ -37,18 +36,24 @@ const AllProducts = () => {
         </button>
       </header>
 
-      <main className="flex items-center flex-wrap gap-3 py-8 h-[calc(100vh-190px)] overflow-y-auto">
-        {allProduct.length > 0 ? (
+      {/* Products Grid */}
+      <main className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-8 h-[calc(100vh-190px)] overflow-y-auto">
+        {isLoading ? (
+          <p className="text-center w-full animate-pulse">Loading products...</p>
+        ) : error ? (
+          <p className="text-center w-full text-red-500">Error fetching products.</p>
+        ) : allProduct.length > 0 ? (
           allProduct.map((product, index) => (
-            <AdminProductCard data={product} key={index} fetchdata={fetchAllProduct} />
+            <AdminProductCard data={product} key={index} fetchData={refetch} />
           ))
         ) : (
           <p className="text-center w-full">No Market.</p>
         )}
       </main>
 
+      {/* Upload Product Modal */}
       {openUploadProduct && (
-        <UploadProduct onClose={() => setOpenUploadProduct(false)} fetchData={fetchAllProduct} />
+        <UploadProduct onClose={() => setOpenUploadProduct(false)} fetchData={refetch} />
       )}
     </div>
   );

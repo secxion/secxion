@@ -8,7 +8,6 @@ const Sidebar = ({ categories, onCategorySelect }) => {
 
   const toggleSidebar = () => setIsOpen((prev) => !prev);
 
-  // Filter categories based on the search term
   const filteredCategories = categories.filter((category) =>
     category.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -30,7 +29,6 @@ const Sidebar = ({ categories, onCategorySelect }) => {
         </button>
       </div>
 
-      {/** Search bar */}
       <div className="p-4">
         <div className="flex items-center bg-white rounded-full px-3 py-2 shadow-md">
           <Search size={18} className="text-gray-500" />
@@ -44,7 +42,6 @@ const Sidebar = ({ categories, onCategorySelect }) => {
         </div>
       </div>
 
-      {/** Category list */}
       <motion.ul
         className="p-4 space-y-3"
         initial="hidden"

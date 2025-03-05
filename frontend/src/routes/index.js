@@ -10,10 +10,8 @@ import AllUsers from "../pages/AllUsers";
 import AllProducts from "../pages/AllProducts";
 import CategoryProduct from "../pages/CategoryProduct";
 import ProductDetails from "../Components/ProductDetails";
-import Cart from "../pages/Cart";
 import SearchProduct from "../pages/SearchProduct";
 import Section from "../pages/Section";
-import Notification from "../Components/Notification";
 import Profile from "../Components/Profile";
 import Settings from "../Components/Settings";
 import Wallet from "../Components/Wallet";
@@ -23,6 +21,8 @@ import UserUploadMarket from "../Components/UserUploadMarket";
 import UserMarket from "../pages/UserMarket";
 import Net from "../Components/Net";
 import UsersMarket from "../pages/UsersMarket";
+import BlogManagementPage from "../pages/BlogManagement";
+
 
 const publicRoutes = [
   {
@@ -51,11 +51,8 @@ const protectedRoutes = [
   { path: "record", element: <UserMarket /> },
   { path: "product-category", element: <CategoryProduct /> },
   { path: "product/:id", element: <ProductDetails /> },
-  { path: "cart", element: <Cart /> },
   { path: "search", element: <SearchProduct /> },
-
   { path: "wallet", element: <Wallet /> },
-  { path: "notifications", element: <Notification /> },
   { path: "profile", element: <Profile /> },
   { path: "settings", element: <Settings /> },
 ];
@@ -64,7 +61,8 @@ const adminRoutes = [
   { path: "all-users", element: <AllUsers /> },
   { path: "all-products", element: <AllProducts /> },
   { path: "users-market", element: <UsersMarket /> },
-
+  { path: "system-blog", element: <BlogManagementPage /> },
+  
 ];
 
 const router = createBrowserRouter([
