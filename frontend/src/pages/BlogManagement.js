@@ -32,18 +32,17 @@ const BlogManagement = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to delete blog: ${response.statusText}`);
+        throw new Error("Network response was not ok");
       }
 
       const responseData = await response.json();
       if (responseData.success) {
         await fetchBlogs(); 
-        toast.success("Blog deleted successfully!");
+        toast.error("failed");
       } else {
-        toast.error("Failed to delete the blog.");
+        toast.success("Blog deleted successfully!");
       }
     } catch (error) {
-      console.error("Error deleting blog:", error);
       toast.error("Failed to delete the blog. Please try again.");
     }
   };

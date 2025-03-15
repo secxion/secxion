@@ -5,6 +5,7 @@ const Net = ({ blogs }) => {
   const [systemBlogs, setSystemBlogs] = useState([]);
 
   useEffect(() => {
+    // Combine blogs with a duplicate for continuous scrolling effect
     setSystemBlogs([...blogs, ...blogs]); 
   }, [blogs]);
 
