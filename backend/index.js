@@ -61,15 +61,23 @@ io.use((socket, next) => {
 
   token = token.replace("Bearer ", "");
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+  console.log("🟡 Using JWT Secret:", process.env.TOKEN_SECRET_KEY ? "✅ Loaded" : "❌ Not Loaded");
+
+  if (!process.env.TOKEN_SECRET_KEY) {
+    return next(new Error("JWT Secret is missing"));
+  }
+
+  jwt.verify(token, process.env.TOKEN_SECRET_KEY, (err, decoded) => {
     if (err) {
       console.log("❌ WebSocket authentication failed:", err.message);
       return next(new Error("Authentication error"));
     }
     socket.user = decoded;
+    console.log("🟢 WebSocket Authenticated:", decoded);
     next();
   });
 });
+
 
 
 socketHandler(io);
