@@ -46,13 +46,22 @@ const io = new Server(server, {
 });
 
 io.use((socket, next) => {
-  const token = socket.handshake.auth?.token || socket.handshake.headers?.authorization;
+  let token = socket.handshake.auth?.token || socket.handshake.headers?.authorization;
+
+  if (!token && socket.request.headers.cookie) {
+    const cookies = socket.request.headers.cookie.split("; ");
+    const authCookie = cookies.find((cookie) => cookie.startsWith("token="));
+    if (authCookie) token = authCookie.split("=")[1];
+  }
+
   if (!token) {
     console.log("❌ No JWT token provided for WebSocket connection.");
     return next(new Error("Authentication error"));
   }
 
-  jwt.verify(token.replace("Bearer ", ""), process.env.JWT_SECRET, (err, decoded) => {
+  token = token.replace("Bearer ", "");
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       console.log("❌ WebSocket authentication failed:", err.message);
       return next(new Error("Authentication error"));
@@ -61,6 +70,7 @@ io.use((socket, next) => {
     next();
   });
 });
+
 
 socketHandler(io);
 

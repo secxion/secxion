@@ -8,10 +8,13 @@ import Context from "./Context";
 import { fetchUserDetailsAPI, fetchMarketDataAPI, fetchBlogsAPI } from "./services/apiService";
 import "./styles/Loader.css";
 import { ChatProvider } from "./Context/chatContext";
+import { io } from "socket.io-client"; // WebSocket Client
 
 const Header = lazy(() => import("./Components/Header"));
 const Footer = lazy(() => import("./Components/Footer"));
 const Net = lazy(() => import("./Components/Net"));
+
+const SERVER_URL = "https://secxion-f.onrender.com"; // Change if needed
 
 function Loader() {
   return (
@@ -29,6 +32,7 @@ function App() {
   const [marketData, setMarketData] = useState(null);
   const [blogs, setBlogs] = useState(null);
   const [loading, setLoadingState] = useState(false);
+  const [socket, setSocket] = useState(null); // Store WebSocket instance
 
   const fetchUserDetails = async () => {
     try {
@@ -70,10 +74,33 @@ function App() {
     }
   };
 
+  // 🔹 Initialize WebSocket Connection
   useEffect(() => {
     fetchUserDetails();
     fetchMarketData();
     fetchBlogs();
+
+    const token = localStorage.getItem("token"); // Get token from storage
+    if (token) {
+      const socketInstance = io(SERVER_URL, {
+        auth: { token: `Bearer ${token}` }, // Send token for authentication
+        transports: ["websocket", "polling"],
+      });
+
+      setSocket(socketInstance);
+
+      socketInstance.on("connect", () => {
+        console.log("🟢 WebSocket Connected:", socketInstance.id);
+      });
+
+      socketInstance.on("disconnect", (reason) => {
+        console.log("🔴 WebSocket Disconnected:", reason);
+      });
+
+      return () => {
+        socketInstance.disconnect();
+      };
+    }
   }, []);
 
   if (loading) {
@@ -82,7 +109,7 @@ function App() {
 
   return (
     <ChatProvider>
-      <Context.Provider value={{ fetchUserDetails, fetchMarketData, marketData, user, fetchBlogs, blogs }}>
+      <Context.Provider value={{ fetchUserDetails, fetchMarketData, marketData, user, fetchBlogs, blogs, socket }}>
         <Suspense fallback={<Loader />}>
           <Net blogs={blogs} fetchBlogs={fetchBlogs} />
           <Header />
