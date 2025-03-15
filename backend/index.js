@@ -7,11 +7,9 @@ const connectDB = require("./config/db");
 const router = require("./routes");
 const helmet = require("helmet");
 const morgan = require("morgan");
-const mysql = require("mysql2/promise");
 const http = require("http");
 const { Server } = require("socket.io");
 const { socketHandler } = require("./controller/chatController");
-const authToken = require("./middleware/authToken");
 
 const app = express();
 const server = http.createServer(app);
@@ -21,7 +19,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL || "https://secxion-f.onrender.com
 app.use(
   cors({
     origin: FRONTEND_URL,
-    credentials: true, 
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
@@ -38,7 +36,7 @@ const io = new Server(server, {
 socketHandler(io);
 
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
+  windowMs: 15 * 60 * 1000,
   max: 100,
 });
 
@@ -81,4 +79,3 @@ connectDB().then(() => {
     console.log(`✅ API is live at: http://localhost:${PORT}/api`);
   });
 });
-

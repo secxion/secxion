@@ -1,6 +1,6 @@
-const bcrypt = require('bcryptjs');
-const userModel = require('../../models/userModel');
-const jwt = require('jsonwebtoken');
+const bcrypt = require("bcryptjs");
+const userModel = require("../../models/userModel");
+const jwt = require("jsonwebtoken");
 
 async function userSignInController(req, res) {
   try {
@@ -28,8 +28,8 @@ async function userSignInController(req, res) {
 
       const tokenOptions = {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Strict',
+        secure: process.env.NODE_ENV === "production", 
+        sameSite: "None",
       };
 
       res.cookie("token", token, tokenOptions);
