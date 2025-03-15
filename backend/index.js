@@ -17,13 +17,11 @@ const server = http.createServer(app);
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "https://secxion-f.onrender.com";
 
-// ✅ Ensure WebSocket Requests Bypass Middleware
 app.use((req, res, next) => {
   if (req.headers.upgrade?.toLowerCase() === "websocket") return next();
   next();
 });
 
-// ✅ CORS Configuration (Including WebSockets)
 app.use(
   cors({
     origin: FRONTEND_URL,
@@ -53,11 +51,6 @@ io.use((socket, next) => {
     const cookies = socket.request.headers.cookie.split("; ");
     const authCookie = cookies.find((cookie) => cookie.startsWith("token="));
     if (authCookie) token = authCookie.split("=")[1];
-  }
-
-  if (!token) {
-    console.log("❌ No JWT token provided for WebSocket connection.");
-    return next(new Error("Authentication error: No token provided"));
   }
 
   token = token.replace("Bearer ", "");
