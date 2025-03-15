@@ -34,6 +34,7 @@ app.use(
   })
 );
 
+
 const io = new Server(server, {
   cors: {
     origin: FRONTEND_URL,
@@ -43,7 +44,7 @@ const io = new Server(server, {
   },
   allowEIO3: true,
   pingTimeout: 60000,
-  pingInterval: 25000,
+  pingInterval: 25000, 
 });
 
 io.use((socket, next) => {
@@ -53,11 +54,6 @@ io.use((socket, next) => {
     const cookies = socket.request.headers.cookie.split("; ");
     const authCookie = cookies.find((cookie) => cookie.startsWith("token="));
     if (authCookie) token = authCookie.split("=")[1];
-  }
-
-  if (!token) {
-    console.log("❌ No JWT token provided for WebSocket connection.");
-    return next(new Error("Authentication error"));
   }
 
   token = token.replace("Bearer ", "");
@@ -78,6 +74,8 @@ io.use((socket, next) => {
     next();
   });
 });
+
+
 
 socketHandler(io);
 
