@@ -11,14 +11,16 @@ const BlogManagement = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
 
+  console.log("🔹 Token Retrieved:", token ? `✅ ${token}` : "❌ No token found");
+
   useEffect(() => {
-    if (token === undefined) return; 
     if (!token) {
+      console.warn("⚠️ Unauthorized: No token found.");
       toast.error("Unauthorized access. Please log in.");
       return;
     }
     fetchBlogs();
-  }, [fetchBlogs, token]); 
+  }, [fetchBlogs, token]);
 
   const handleCreateBlog = () => {
     setIsCreating(true);
@@ -32,6 +34,8 @@ const BlogManagement = () => {
 
   const handleDeleteBlog = async (id) => {
     try {
+      console.log(`🟡 Attempting to delete blog with ID: ${id}`);
+      
       const response = await fetch(`${SummaryApi.deleteBlog.url}/${id}`, {
         method: SummaryApi.deleteBlog.method,
         credentials: "include",
@@ -42,19 +46,18 @@ const BlogManagement = () => {
       });
 
       const responseData = await response.json();
+      console.log("🟢 Delete Response:", responseData);
 
       if (!response.ok) {
-        throw new Error(responseData.message || "Network response was not ok");
+        toast.error(responseData.message || "Failed to delete blog.");
+        return;
       }
 
-      if (!responseData.success) {
-        toast.error(responseData.message || "Failed to delete blog.");
-      } else {
-        toast.success("Blog deleted successfully!");
-        await fetchBlogs();
-      }
+      toast.success(responseData.message || "Blog deleted successfully!");
+      await fetchBlogs();
     } catch (error) {
-      toast.error(error.message || "Failed to delete the blog. Please try again.");
+      console.error("❌ Delete Error:", error);
+      toast.error(error.message || "Something went wrong. Please try again.");
     }
   };
 
