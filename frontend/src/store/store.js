@@ -1,23 +1,23 @@
 import { configureStore } from "@reduxjs/toolkit";
-import userReducer from "./userSlice"; 
-import chatReducer from "./chatSlice"; // ✅ Import chatSlice
-
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import { FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from "redux-persist";
 
-// Persist Config for userReducer
+import userReducer from "./userSlice";
+import chatReducer from "./chatSlice"; 
+
 const persistConfig = {
   key: "user",
   storage,
+  whitelist: ["token", "user", "isLoggedIn"], 
 };
 
 const persistedUserReducer = persistReducer(persistConfig, userReducer);
 
 export const store = configureStore({
   reducer: {
-    user: persistedUserReducer,
-    chat: chatReducer, // ✅ Add chatReducer
+    user: persistedUserReducer, 
+    chat: chatReducer, 
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

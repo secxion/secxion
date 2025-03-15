@@ -86,6 +86,7 @@ export const ChatProvider = ({ children }) => {
             "Content-Type": "application/json",
           },
           withCredentials: true,
+          credentials: "include",
         }
       );
 

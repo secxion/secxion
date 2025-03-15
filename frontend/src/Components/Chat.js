@@ -14,6 +14,8 @@ const Chat = ({ receiver }) => {
         const response = await fetch(SummaryApi.getmessages.url.replace(':userId', receiver), {
           method: SummaryApi.getmessages.method,
           credentials: "include",
+          headers: { "Content-Type": "application/json" },
+
         });
 
         if (!response.ok) {

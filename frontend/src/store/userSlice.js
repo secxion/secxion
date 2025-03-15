@@ -1,10 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  token: localStorage.getItem("token") || null,
-  user: JSON.parse(localStorage.getItem("user")) || null, 
+  token: null,
+  user: null,
   loading: false,
-  isLoggedIn: !!localStorage.getItem("token"), // Track logged-in state
+  isLoggedIn: false,
 };
 
 const userSlice = createSlice({
@@ -13,12 +13,11 @@ const userSlice = createSlice({
   reducers: {
     setToken: (state, action) => {
       state.token = action.payload;
-      localStorage.setItem("token", action.payload);
-      state.isLoggedIn = !!action.payload; // Update logged-in state
+      state.isLoggedIn = !!action.payload; 
     },
     setUserDetails: (state, action) => {
       state.user = action.payload;
-      localStorage.setItem("user", JSON.stringify(action.payload)); 
+      state.isLoggedIn = !!action.payload;
     },
     setLoading: (state, action) => {
       state.loading = action.payload;
@@ -26,15 +25,16 @@ const userSlice = createSlice({
     logout: (state) => {
       state.token = null;
       state.user = null;
-      state.isLoggedIn = false; // Update logged-in state
-      localStorage.removeItem("token");
-      localStorage.removeItem("user"); 
+      state.isLoggedIn = false;
     },
-    setIsLoggedIn: (state, action) => { // New action to set logged-in state
-      state.isLoggedIn = action.payload;
+    clearState: (state) => {
+      state.token = null;
+      state.user = null;
+      state.isLoggedIn = false;
+      state.loading = false;
     },
   },
 });
 
-export const { setToken, setUserDetails, setLoading, logout, setIsLoggedIn } = userSlice.actions;
+export const { setToken, setUserDetails, setLoading, logout, clearState } = userSlice.actions;
 export default userSlice.reducer;

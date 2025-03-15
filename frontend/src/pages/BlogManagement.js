@@ -28,20 +28,22 @@ const BlogManagement = () => {
     try {
       const response = await fetch(`${SummaryApi.deleteBlog.url}/${id}`, {
         method: SummaryApi.deleteBlog.method,
+        credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        throw new Error(`Failed to delete blog: ${response.statusText}`);
       }
 
       const responseData = await response.json();
       if (responseData.success) {
         await fetchBlogs(); 
-        toast.error("failed");
-      } else {
         toast.success("Blog deleted successfully!");
+      } else {
+        toast.error("Failed to delete the blog.");
       }
     } catch (error) {
+      console.error("Error deleting blog:", error);
       toast.error("Failed to delete the blog. Please try again.");
     }
   };

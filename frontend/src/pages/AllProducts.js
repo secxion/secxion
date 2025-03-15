@@ -5,12 +5,22 @@ import SummaryApi from "../common";
 import AdminProductCard from "../Components/AdminProductCard";
 
 const fetchAllProducts = async () => {
-  const response = await fetch(SummaryApi.allProduct.url);
-  if (!response.ok) {
-    throw new Error("Network response was not ok");
+  try {
+    const response = await fetch(SummaryApi.allProduct.url, {
+      method: "GET",
+      credentials: "include", 
+    });
+
+    if (!response.ok) {
+      throw new Error(`Network error: ${response.status} ${response.statusText}`);
+    }
+
+    const dataResponse = await response.json();
+    return dataResponse?.data || [];
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return []; 
   }
-  const dataResponse = await response.json();
-  return dataResponse?.data || [];
 };
 
 const AllProducts = () => {
@@ -19,8 +29,8 @@ const AllProducts = () => {
   const { data: allProduct = [], isLoading, error, refetch } = useQuery({
     queryKey: ["allProducts"],
     queryFn: fetchAllProducts,
-    staleTime: 1000 * 60 * 5, 
-    retry: 2, 
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+    retry: 2, // Retry 2 times if the request fails
   });
 
   return (

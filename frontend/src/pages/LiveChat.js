@@ -29,8 +29,8 @@ const LiveChat = () => {
     try {
       const res = await fetch(SummaryApi.getAdmins.url, {
         method: SummaryApi.getAdmins.method,
-        credentials: "include",
-      });
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",      });
   
       const data = await res.json();
       console.log("Admin API response:", data);

@@ -46,8 +46,10 @@ export const ContextProvider = ({ children }) => {
     try {
       const response = await fetch(SummaryApi.userDetails.url, {
         method: SummaryApi.userDetails.method,
-        headers: getAuthHeaders(),
+        headers: getAuthHeaders(),       
+        credentials: "include",
       });
+    
 
       if (!response.ok) {
         throw new Error("Failed to fetch user details");

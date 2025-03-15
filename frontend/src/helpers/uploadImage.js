@@ -1,16 +1,26 @@
-const url = 'https://api.cloudinary.com/v1_1/dxhi0grdd/image/upload'
-const uploadImage = async(image) => {
-    const formData = new FormData()
-    formData.append("file",image)
-    formData.append("upload_preset","section_")
+const url = "https://api.cloudinary.com/v1_1/dxhi0grdd/image/upload";
 
+const uploadImage = async (image) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", image);
+    formData.append("upload_preset", "section_");
 
-    const dataResponse = await fetch(url,{
-        method : 'post',
-        body : formData
-    })
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData,
+    //   credentials: "include", 
+    });
 
-    return dataResponse.json()
-}
+    if (!response.ok) {
+      throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+    }
 
-export default uploadImage
+    return await response.json();
+  } catch (error) {
+    console.error("Image upload error:", error);
+    return { error: error.message };
+  }
+};
+
+export default uploadImage;

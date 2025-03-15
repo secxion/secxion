@@ -17,7 +17,7 @@ root.render(
   <Provider store={store}>
     <PersistGate loading={<div>Loading app...</div>} persistor={persistor}>
       <QueryClientProvider client={queryClient}>
-        <ContextProvider>  {/* ✅ Wrap app inside ContextProvider */}
+        <ContextProvider> 
           <RouterProvider router={router} />
         </ContextProvider>
       </QueryClientProvider>

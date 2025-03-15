@@ -33,6 +33,7 @@ const CategoryProduct = () => {
         const response = await fetch(`${SummaryApi.filterProduct.url}`, {
           method: SummaryApi.filterProduct.method,
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ category: categories }),
         });
         if (!response.ok) throw new Error("Failed to fetch data. Please try again later.");

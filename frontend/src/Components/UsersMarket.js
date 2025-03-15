@@ -48,7 +48,8 @@ const UsersMarket = () => {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${localStorage.getItem("token")}`
-                },
+                },                
+                  credentials: "include",
                 body: JSON.stringify({ 
                     status, 
                     cancelReason: status === 'CANCEL' ? reason : undefined, 

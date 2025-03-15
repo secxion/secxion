@@ -1,14 +1,14 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setUserDetails, setLoading } from "./store/userSlice";
 import Context from "./Context";
-import { useQuery } from "@tanstack/react-query";
 import { fetchUserDetailsAPI, fetchMarketDataAPI, fetchBlogsAPI } from "./services/apiService";
 import "./styles/Loader.css";
 import { ChatProvider } from "./Context/chatContext";
+
 const Header = lazy(() => import("./Components/Header"));
 const Footer = lazy(() => import("./Components/Footer"));
 const Net = lazy(() => import("./Components/Net"));
@@ -24,67 +24,87 @@ function Loader() {
 
 function App() {
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.user);
 
-  const { data: user, refetch: fetchUserDetails, isLoading: isUserLoading } = useQuery({
-    queryKey: ["user"],
-    queryFn: async () => {
+  const [marketData, setMarketData] = useState(null);
+  const [blogs, setBlogs] = useState(null);
+  const [loading, setLoadingState] = useState(false);
+
+  const fetchUserDetails = async () => {
+    try {
       dispatch(setLoading(true));
       const res = await fetchUserDetailsAPI();
-      dispatch(setLoading(false));
-
       if (res.success) {
         dispatch(setUserDetails(res.data));
-        return res.data;
       } else {
         dispatch(setUserDetails(null));
-        return null;
       }
-    },
-    staleTime: 5 * 60 * 1000,
-  });
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
 
-  const { data: marketData, refetch: fetchMarketData, isLoading: isMarketLoading } = useQuery({
-    queryKey: ["marketData"],
-    queryFn: fetchMarketDataAPI,
-    staleTime: 5 * 60 * 1000,
-  });
+  const fetchMarketData = async () => {
+    try {
+      setLoadingState(true);
+      const data = await fetchMarketDataAPI();
+      setMarketData(data);
+    } catch (error) {
+      console.error("Error fetching market data:", error);
+    } finally {
+      setLoadingState(false);
+    }
+  };
 
-  const { data: blogs, refetch: fetchBlogs, isLoading: isBlogsLoading } = useQuery({
-    queryKey: ["blogs"],
-    queryFn: fetchBlogsAPI,
-    staleTime: 5 * 60 * 1000,
-  });
+  const fetchBlogs = async () => {
+    try {
+      setLoadingState(true);
+      const data = await fetchBlogsAPI();
+      setBlogs(data);
+    } catch (error) {
+      console.error("Error fetching blogs:", error);
+    } finally {
+      setLoadingState(false);
+    }
+  };
 
-  if (isUserLoading || isMarketLoading || isBlogsLoading) {
+  useEffect(() => {
+    fetchUserDetails();
+    fetchMarketData();
+    fetchBlogs();
+  }, []);
+
+  if (loading) {
     return <Loader />;
   }
 
   return (
     <ChatProvider>
-    <Context.Provider value={{ fetchUserDetails, fetchMarketData, marketData, user, fetchBlogs, blogs }}>
-      <Suspense fallback={<Loader />}>
-        <Net blogs={blogs} fetchBlogs={fetchBlogs} />
-        <Header />
-        <main className="min-h-[calc(100vh-120px)] pt-16 mt-6">
-          <Outlet />
-        </main>
-        <Footer />
-      </Suspense>
-      <ToastContainer 
-        position="top-right" 
-        autoClose={2000} 
-        hideProgressBar={false} 
-        newestOnTop={false} 
-        closeOnClick 
-        rtl={false} 
-        pauseOnFocusLoss 
-        draggable 
-        pauseOnHover 
-        theme="colored"
-      />
-    </Context.Provider>
+      <Context.Provider value={{ fetchUserDetails, fetchMarketData, marketData, user, fetchBlogs, blogs }}>
+        <Suspense fallback={<Loader />}>
+          <Net blogs={blogs} fetchBlogs={fetchBlogs} />
+          <Header />
+          <main className="min-h-[calc(100vh-120px)] pt-16 mt-6">
+            <Outlet />
+          </main>
+          <Footer />
+        </Suspense>
+        <ToastContainer 
+          position="top-right" 
+          autoClose={2000} 
+          hideProgressBar={false} 
+          newestOnTop={false} 
+          closeOnClick 
+          rtl={false} 
+          pauseOnFocusLoss 
+          draggable 
+          pauseOnHover 
+          theme="colored"
+        />
+      </Context.Provider>
     </ChatProvider>
-
   );
 }
 
