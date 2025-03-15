@@ -29,64 +29,64 @@ export const ChatProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    const fetchAdmin = async () => {
+    const fetchAdmins = async () => {
       try {
-        const loggedInAdmin = JSON.parse(localStorage.getItem("admin")); 
-        if (loggedInAdmin && loggedInAdmin._id) {
-          setAdminId(loggedInAdmin._id);
-          console.log("🟢 Using logged-in admin:", loggedInAdmin._id);
+        const storedAdmin = JSON.parse(localStorage.getItem("admin"));
+        const token = localStorage.getItem("token");
+        if (storedAdmin && storedAdmin._id) {
+          setAdminId(storedAdmin._id);
+          console.log("🟢 Using logged-in admin:", storedAdmin._id);
           return;
         }
-  
-        const response = await fetch(SummaryApi.getAdmins.url, {
-          method: "GET",
+
+        if (!token) {
+          console.error("🔴 No JWT token found for admin request");
+          return;
+        }
+
+        const response = await axios.get(SummaryApi.getAdmins.url, {
           headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          credentials: "include",
+          withCredentials: true,
         });
-  
-        if (!response.ok) {
-          throw new Error(`HTTP Error: ${response.status}`);
-        }
-  
-        const data = await response.json();
-  
-        if (data.success && data.admins.length > 0) {
-          setAdminId(data.admins[0]._id); // ✅ Use first admin if no logged-in admin
-          console.log("🟢 Fallback to first admin:", data.admins[0]._id);
+
+        if (response.data.success && response.data.admins.length > 0) {
+          setAdminId(response.data.admins[0]._id);
+          console.log("🟢 Fallback to first admin:", response.data.admins[0]._id);
         } else {
-          console.error("🔴 No admin found:", data);
+          console.error("🔴 No admin found in response:", response.data);
         }
       } catch (error) {
-        console.error("🔴 Error fetching admin:", error);
+        console.error("🔴 Error fetching admins:", error.response?.data || error);
       }
     };
-  
-    fetchAdmin();
+
+    fetchAdmins();
   }, []);
-  
-  
-  
-  
 
   const sendMessage = async (message, senderId, recipientId = null) => {
     try {
       if (!recipientId) {
-        recipientId = adminId; // Default to Admin if no recipient is specified
+        recipientId = adminId;
+      }
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("🔴 No JWT token found for sending message");
+        return;
       }
 
       const response = await axios.post(
         SummaryApi.sendMessage.url,
-        { senderId, recipientId, message }, // ✅ Corrected field name
+        { senderId, recipientId, message },
         {
           headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
           withCredentials: true,
-          credentials: "include",
         }
       );
 
@@ -96,29 +96,29 @@ export const ChatProvider = ({ children }) => {
         console.error("🔴 Message not sent:", response.data.message);
       }
     } catch (error) {
-      console.error("🔴 Error sending message:", error);
+      console.error("🔴 Error sending message:", error.response?.data || error);
     }
   };
 
   const fetchMessages = async (userId, recipientId) => {
     try {
-      const response = await fetch(`${SummaryApi.getMessages.url}/${userId}/${recipientId}`, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP Error: ${response.status}`);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("🔴 No JWT token found for fetching messages");
+        return;
       }
 
-      const data = await response.json();
-      setMessages(data?.data || []);
+      const response = await axios.get(`${SummaryApi.getMessages.url}/${userId}/${recipientId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      });
+
+      setMessages(response.data?.data || []);
     } catch (error) {
-      console.error("🔴 Error fetching messages:", error);
+      console.error("🔴 Error fetching messages:", error.response?.data || error);
     }
   };
 

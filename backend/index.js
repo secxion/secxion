@@ -16,6 +16,13 @@ const server = http.createServer(app);
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "https://secxion-f.onrender.com";
 
+app.use((req, res, next) => {
+  if (req.headers.upgrade && req.headers.upgrade.toLowerCase() === "websocket") {
+    return next();
+  }
+  next();
+});
+
 app.use(
   cors({
     origin: FRONTEND_URL,
@@ -30,8 +37,11 @@ const io = new Server(server, {
     origin: FRONTEND_URL,
     methods: ["GET", "POST"],
     credentials: true,
+    transports: ["websocket", "polling"], 
   },
+  allowEIO3: true, 
 });
+
 
 socketHandler(io);
 
