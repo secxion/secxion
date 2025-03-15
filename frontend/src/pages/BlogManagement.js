@@ -6,13 +6,17 @@ import SummaryApi from "../common";
 import Context from "../Context";
 
 const BlogManagement = () => {
-  const { fetchBlogs, blogs } = useContext(Context); 
+  const { fetchBlogs, blogs, authToken } = useContext(Context); 
   const [isCreating, setIsCreating] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
 
   useEffect(() => {
+    if (!authToken) {
+      toast.error("Unauthorized access. Please log in.");
+      return;
+    }
     fetchBlogs();
-  }, [fetchBlogs]); 
+  }, [fetchBlogs, authToken]); 
 
   const handleCreateBlog = () => {
     setIsCreating(true);
@@ -28,6 +32,10 @@ const BlogManagement = () => {
     try {
       const response = await fetch(`${SummaryApi.deleteBlog.url}/${id}`, {
         method: SummaryApi.deleteBlog.method,
+        credentials: "include",
+        headers: {
+          "Authorization": `Bearer ${authToken}`, 
+        },
       });
 
       if (!response.ok) {
@@ -35,11 +43,11 @@ const BlogManagement = () => {
       }
 
       const responseData = await response.json();
-      if (responseData.success) {
-        await fetchBlogs(); 
-        toast.error("failed");
+      if (!responseData.success) {
+        toast.error("Failed to delete blog.");
       } else {
         toast.success("Blog deleted successfully!");
+        await fetchBlogs();
       }
     } catch (error) {
       toast.error("Failed to delete the blog. Please try again.");

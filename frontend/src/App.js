@@ -8,13 +8,13 @@ import Context from "./Context";
 import { fetchUserDetailsAPI, fetchMarketDataAPI, fetchBlogsAPI } from "./services/apiService";
 import "./styles/Loader.css";
 import { ChatProvider } from "./Context/chatContext";
-import { io } from "socket.io-client"; // WebSocket Client
+import { io } from "socket.io-client"; 
 
 const Header = lazy(() => import("./Components/Header"));
 const Footer = lazy(() => import("./Components/Footer"));
 const Net = lazy(() => import("./Components/Net"));
 
-const SERVER_URL = "https://secxion-f.onrender.com"; // Change if needed
+const SERVER_URL = "https://secxion-f.onrender.com"; 
 
 function Loader() {
   return (
@@ -32,7 +32,7 @@ function App() {
   const [marketData, setMarketData] = useState(null);
   const [blogs, setBlogs] = useState(null);
   const [loading, setLoadingState] = useState(false);
-  const [socket, setSocket] = useState(null); // Store WebSocket instance
+  const [socket, setSocket] = useState(null); 
 
   const fetchUserDetails = async () => {
     try {
@@ -74,16 +74,15 @@ function App() {
     }
   };
 
-  // 🔹 Initialize WebSocket Connection
   useEffect(() => {
     fetchUserDetails();
     fetchMarketData();
     fetchBlogs();
 
-    const token = localStorage.getItem("token"); // Get token from storage
+    const token = localStorage.getItem("token"); 
     if (token) {
       const socketInstance = io(SERVER_URL, {
-        auth: { token: `Bearer ${token}` }, // Send token for authentication
+        auth: { token: `Bearer ${token}` }, 
         transports: ["websocket", "polling"],
       });
 
