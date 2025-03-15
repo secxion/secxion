@@ -11,7 +11,7 @@ const mysql = require("mysql2/promise");
 const http = require("http");
 const { Server } = require("socket.io");
 const { socketHandler } = require("./controller/chatController");
-const authToken = require("./middleware/authToken"); // Import the authToken middleware
+const authToken = require("./middleware/authToken"); 
 
 const app = express();
 const server = http.createServer(app);
