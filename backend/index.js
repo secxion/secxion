@@ -10,6 +10,7 @@ const morgan = require("morgan");
 const http = require("http");
 const { Server } = require("socket.io");
 const { socketHandler } = require("./controller/chatController");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 const server = http.createServer(app);
@@ -37,11 +38,29 @@ const io = new Server(server, {
     origin: FRONTEND_URL,
     methods: ["GET", "POST"],
     credentials: true,
-    transports: ["websocket", "polling"], 
+    transports: ["websocket", "polling"],
   },
-  allowEIO3: true, 
+  allowEIO3: true,
+  pingTimeout: 25000, 
+  pingInterval: 10000, 
 });
 
+io.use((socket, next) => {
+  const token = socket.handshake.auth?.token || socket.handshake.headers?.authorization;
+  if (!token) {
+    console.log("❌ No JWT token provided for WebSocket connection.");
+    return next(new Error("Authentication error"));
+  }
+
+  jwt.verify(token.replace("Bearer ", ""), process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      console.log("❌ WebSocket authentication failed:", err.message);
+      return next(new Error("Authentication error"));
+    }
+    socket.user = decoded;
+    next();
+  });
+});
 
 socketHandler(io);
 
