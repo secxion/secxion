@@ -41,7 +41,9 @@ async function userSignInController(req, res) {
 
     console.log("✅ Token set successfully");
 
-    res.status(200).json({
+    res.setHeader("Authorization", `Bearer ${token}`);
+
+    return res.status(200).json({
       message: "Login successful",
       data: { token },
       success: true,
