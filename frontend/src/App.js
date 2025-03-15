@@ -44,7 +44,7 @@ function App() {
         dispatch(setUserDetails(null));
       }
     } catch (error) {
-      console.error("Error fetching user details:", error);
+      console.error("❌ Error fetching user details:", error);
     } finally {
       dispatch(setLoading(false));
     }
@@ -56,7 +56,7 @@ function App() {
       const data = await fetchMarketDataAPI();
       setMarketData(data);
     } catch (error) {
-      console.error("Error fetching market data:", error);
+      console.error("❌ Error fetching market data:", error);
     } finally {
       setLoadingState(false);
     }
@@ -68,7 +68,7 @@ function App() {
       const data = await fetchBlogsAPI();
       setBlogs(data);
     } catch (error) {
-      console.error("Error fetching blogs:", error);
+      console.error("❌ Error fetching blogs:", error);
     } finally {
       setLoadingState(false);
     }
@@ -79,27 +79,44 @@ function App() {
     fetchMarketData();
     fetchBlogs();
 
-    const token = localStorage.getItem("token"); 
-    if (token) {
-      const socketInstance = io(SERVER_URL, {
-        auth: { token: `Bearer ${token}` }, 
-        transports: ["websocket", "polling"],
-      });
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
-      setSocket(socketInstance);
-
-      socketInstance.on("connect", () => {
-        console.log("🟢 WebSocket Connected:", socketInstance.id);
-      });
-
-      socketInstance.on("disconnect", (reason) => {
-        console.log("🔴 WebSocket Disconnected:", reason);
-      });
-
-      return () => {
-        socketInstance.disconnect();
-      };
+    if (!token) {
+      console.warn("⚠️ No token found, skipping WebSocket connection.");
+      return;
     }
+  
+    console.log("🟢 Connecting WebSocket with Token:", `Bearer ${token}`);
+  
+    const socketInstance = io(SERVER_URL, {
+      auth: { token: `Bearer ${token}` }, 
+      transports: ["websocket", "polling"],
+      reconnectionAttempts: 10,  
+      reconnectionDelay: 3000,   
+      reconnectionDelayMax: 10000 
+    });
+  
+    setSocket(socketInstance);
+  
+    socketInstance.on("connect", () => {
+      console.log("✅ WebSocket Connected:", socketInstance.id);
+    });
+  
+    socketInstance.on("disconnect", (reason) => {
+      console.warn("🔴 WebSocket Disconnected:", reason);
+      if (reason === "io server disconnect") {
+        socketInstance.connect(); 
+      }
+    });
+  
+    socketInstance.on("connect_error", (err) => {
+      console.error("❌ WebSocket Connection Error:", err.message);
+    });
+  
+    return () => {
+      console.log("⚠️ Disconnecting WebSocket...");
+      socketInstance.disconnect();
+    };
   }, []);
 
   if (loading) {

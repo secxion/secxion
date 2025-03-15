@@ -41,8 +41,8 @@ const io = new Server(server, {
     transports: ["websocket", "polling"],
   },
   allowEIO3: true,
-  pingTimeout: 25000, 
-  pingInterval: 10000, 
+  pingTimeout: 60000,
+  pingInterval: 25000, 
 });
 
 io.use((socket, next) => {
