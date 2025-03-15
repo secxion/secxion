@@ -30,7 +30,7 @@ app.use(
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    exposedHeaders: ["Authorization"],
+    exposedHeaders: ["Authorization"], // ✅ Allow frontend to access Authorization header
   })
 );
 
@@ -54,6 +54,11 @@ io.use((socket, next) => {
     const cookies = socket.request.headers.cookie.split("; ");
     const authCookie = cookies.find((cookie) => cookie.startsWith("token="));
     if (authCookie) token = authCookie.split("=")[1];
+  }
+
+  if (!token) {
+    console.log("❌ No JWT token provided for WebSocket connection.");
+    return next(new Error("Authentication error"));
   }
 
   token = token.replace("Bearer ", "");

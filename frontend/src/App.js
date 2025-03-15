@@ -17,7 +17,8 @@ const Net = lazy(() => import("./Components/Net"));
 const SERVER_URL = "https://secxion-f.onrender.com"; 
 
 function Loader() {
-  return (   
+  return (
+   
     <div className="loader-container">
       <div className="loader"></div>
       <p className="loading-text">Loading, please wait...</p>
