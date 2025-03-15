@@ -2,21 +2,17 @@ import React, { useEffect, useState, useContext } from "react";
 import BlogForm from "../Components/BlogForm";
 import BlogCard from "../Components/BlogCard";
 import { toast } from "react-toastify";
-import SummaryApi from "../common"; 
+import SummaryApi from "../common";
 import Context from "../Context";
 
 const BlogManagement = () => {
-  const { fetchBlogs, blogs, token } = useContext(Context); 
+  const { fetchBlogs, blogs, token } = useContext(Context);
   const [isCreating, setIsCreating] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
 
   useEffect(() => {
-    if (!token) {
-      toast.error("Unauthorized access. Please log in.");
-      return;
-    }
     fetchBlogs();
-  }, [fetchBlogs, token]); 
+  }, [fetchBlogs]);
 
   const handleCreateBlog = () => {
     setIsCreating(true);
@@ -34,23 +30,21 @@ const BlogManagement = () => {
         method: SummaryApi.deleteBlog.method,
         credentials: "include",
         headers: {
-          "Authorization": `Bearer ${token}`, 
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       });
 
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
+      const responseData = await response.json();
+
+      if (!response.ok || !responseData.success) {
+        throw new Error(responseData.message || "Failed to delete blog.");
       }
 
-      const responseData = await response.json();
-      if (!responseData.success) {
-        toast.error("Failed to delete blog.");
-      } else {
-        toast.success("Blog deleted successfully!");
-        await fetchBlogs();
-      }
+      toast.success("✅ Blog deleted successfully!");
+      fetchBlogs(); 
     } catch (error) {
-      toast.error("Failed to delete the blog. Please try again.");
+      toast.error("❌ " + (error.message || "Failed to delete the blog. Please try again."));
     }
   };
 
@@ -77,12 +71,7 @@ const BlogManagement = () => {
       <main className="flex items-center flex-wrap gap-3 py-8 h-[calc(100vh-190px)] overflow-y-auto">
         {blogs.length > 0 ? (
           blogs.map((blog) => (
-            <BlogCard
-              key={blog._id}
-              blog={blog}
-              onEdit={handleEditBlog}
-              onDelete={handleDeleteBlog}
-            />
+            <BlogCard key={blog._id} blog={blog} onEdit={handleEditBlog} onDelete={handleDeleteBlog} />
           ))
         ) : (
           <p className="text-center w-full">No Blogs Available.</p>

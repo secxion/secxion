@@ -1,25 +1,24 @@
-import { createContext, useState, useEffect } from "react";
-import SummaryApi from "../common"; 
+import { createContext, useState, useEffect, useCallback } from "react";
+import SummaryApi from "../common";
+import { toast } from "react-toastify";
 
 const Context = createContext(null);
 
 export const ContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
-    const storedToken = localStorage.getItem("token");
-
-    if (storedUser && storedToken) {
+    if (storedUser && token) {
       setUser(storedUser);
-      setToken(storedToken);
     }
     setLoading(false);
-  }, []);
+  }, [token]);
 
-  const login = async (userData, userToken) => {
+  const login = (userData, userToken) => {
     localStorage.setItem("user", JSON.stringify(userData));
     localStorage.setItem("token", userToken);
     setUser(userData);
@@ -34,38 +33,76 @@ export const ContextProvider = ({ children }) => {
   };
 
   const getAuthHeaders = () => {
-    return {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    };
+    return token
+      ? {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        }
+      : {};
   };
 
-  const fetchUserDetails = async () => {
+  const fetchUserDetails = useCallback(async () => {
     if (!token) return;
 
     try {
       const response = await fetch(SummaryApi.userDetails.url, {
         method: SummaryApi.userDetails.method,
-        headers: getAuthHeaders(),       
+        headers: getAuthHeaders(),
         credentials: "include",
       });
-    
+
+      if (response.status === 401) {
+        console.warn("🔴 Token expired or invalid. Logging out...");
+        logout();
+        return;
+      }
 
       if (!response.ok) {
         throw new Error("Failed to fetch user details");
       }
 
       const data = await response.json();
-      setUser(data); 
+      setUser(data);
     } catch (error) {
-      console.error("Error fetching user details:", error);
+      console.error("🔴 Error fetching user details:", error.message);
     }
-  };
+  }, [token]);
 
-  const isLoggedIn = !!user; 
+  useEffect(() => {
+    fetchUserDetails();
+  }, [fetchUserDetails]);
+
+  const fetchBlogs = useCallback(async () => {
+    if (!token) {
+      toast.error("Unauthorized access. Please log in.");
+      return;
+    }
+
+    try {
+      const response = await fetch(SummaryApi.getBlogs.url, {
+        method: SummaryApi.getBlogs.method,
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to fetch blogs.");
+      }
+
+      setBlogs(data.blogs || []);
+    } catch (error) {
+      toast.error(error.message || "Failed to fetch blogs.");
+    }
+  }, [token]);
+
+  const isLoggedIn = !!user;
 
   return (
-    <Context.Provider value={{ user, token, login, logout, getAuthHeaders, fetchUserDetails, isLoggedIn, loading }}>
+    <Context.Provider
+      value={{ user, token, blogs, login, logout, getAuthHeaders, fetchUserDetails, fetchBlogs, isLoggedIn, loading }}
+    >
       {children}
     </Context.Provider>
   );
