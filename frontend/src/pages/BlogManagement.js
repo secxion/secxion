@@ -11,8 +11,9 @@ const BlogManagement = () => {
   const [editingBlog, setEditingBlog] = useState(null);
 
   useEffect(() => {
-    fetchBlogs();
-  }, [fetchBlogs]);
+    
+    fetchBlogs().catch((err) => toast.error("Failed to fetch blogs"));
+  }, [fetchBlogs, token]);
 
   const handleCreateBlog = () => {
     setIsCreating(true);
@@ -30,7 +31,7 @@ const BlogManagement = () => {
         method: SummaryApi.deleteBlog.method,
         credentials: "include",
         headers: {
-          Authorization: `Bearer ${token}`,
+          "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -41,10 +42,10 @@ const BlogManagement = () => {
         throw new Error(responseData.message || "Failed to delete blog.");
       }
 
-      toast.success("✅ Blog deleted successfully!");
-      fetchBlogs(); 
+      toast.success("Blog deleted successfully!");
+      await fetchBlogs();
     } catch (error) {
-      toast.error("❌ " + (error.message || "Failed to delete the blog. Please try again."));
+      toast.error(error.message || "Failed to delete the blog. Please try again.");
     }
   };
 
@@ -71,7 +72,12 @@ const BlogManagement = () => {
       <main className="flex items-center flex-wrap gap-3 py-8 h-[calc(100vh-190px)] overflow-y-auto">
         {blogs.length > 0 ? (
           blogs.map((blog) => (
-            <BlogCard key={blog._id} blog={blog} onEdit={handleEditBlog} onDelete={handleDeleteBlog} />
+            <BlogCard
+              key={blog._id}
+              blog={blog}
+              onEdit={handleEditBlog}
+              onDelete={handleDeleteBlog}
+            />
           ))
         ) : (
           <p className="text-center w-full">No Blogs Available.</p>
