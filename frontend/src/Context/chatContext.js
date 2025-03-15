@@ -72,18 +72,11 @@ export const ChatProvider = ({ children }) => {
         recipientId = adminId;
       }
 
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("🔴 No JWT token found for sending message");
-        return;
-      }
-
       const response = await axios.post(
         SummaryApi.sendMessage.url,
         { senderId, recipientId, message },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
           withCredentials: true,
@@ -110,7 +103,6 @@ export const ChatProvider = ({ children }) => {
 
       const response = await axios.get(`${SummaryApi.getMessages.url}/${userId}/${recipientId}`, {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         withCredentials: true,

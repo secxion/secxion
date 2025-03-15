@@ -6,21 +6,14 @@ import SummaryApi from "../common";
 import Context from "../Context";
 
 const BlogManagement = () => {
-  const { fetchBlogs, blogs, token: contextToken } = useContext(Context); 
-  const token = contextToken || localStorage.getItem("token") || sessionStorage.getItem("token");
+  const { fetchBlogs, blogs } = useContext(Context); 
   const [isCreating, setIsCreating] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
 
-  console.log("🔹 Token Retrieved:", token ? `✅ ${token}` : "❌ No token found");
 
   useEffect(() => {
-    if (!token) {
-      console.warn("⚠️ Unauthorized: No token found.");
-      toast.error("Unauthorized access. Please log in.");
-      return;
-    }
     fetchBlogs();
-  }, [fetchBlogs, token]);
+  }, [fetchBlogs]);
 
   const handleCreateBlog = () => {
     setIsCreating(true);

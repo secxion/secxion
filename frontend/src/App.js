@@ -17,29 +17,11 @@ const Net = lazy(() => import("./Components/Net"));
 const SERVER_URL = "https://secxion-f.onrender.com"; 
 
 function Loader() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-    
-      <>
-        <p className="text-red-500 text-lg font-semibold"></p>
-        <button
-          className="mt-4 px-6 py-2 bg-red-600 text-white font-medium rounded-lg shadow-lg ring-2 ring-red-400 hover:bg-red-700 hover:ring-red-500 transition-all duration-300"
-        >
-          Retry
-        </button>
-      </>
-    
-               
-        <p className="mt-4 text-lg font-semibold text-gray-800 dark:text-gray-300 animate-pulse">
-          Loading SECXION...
-        </p>
-      
-    
-  </div>
-    // <div className="loader-container">
-    //   <div className="loader"></div>
-    //   <p className="loading-text">Loading, please wait...</p>
-    // </div>
+  return (   
+    <div className="loader-container">
+      <div className="loader"></div>
+      <p className="loading-text">Loading, please wait...</p>
+    </div>
   );
 }
 

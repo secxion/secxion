@@ -34,7 +34,6 @@ app.use(
   })
 );
 
-
 const io = new Server(server, {
   cors: {
     origin: FRONTEND_URL,
@@ -44,7 +43,7 @@ const io = new Server(server, {
   },
   allowEIO3: true,
   pingTimeout: 60000,
-  pingInterval: 25000, 
+  pingInterval: 25000,
 });
 
 io.use((socket, next) => {
@@ -79,8 +78,6 @@ io.use((socket, next) => {
     next();
   });
 });
-
-
 
 socketHandler(io);
 
