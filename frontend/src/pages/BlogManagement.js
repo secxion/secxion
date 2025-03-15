@@ -6,15 +6,17 @@ import SummaryApi from "../common";
 import Context from "../Context";
 
 const BlogManagement = () => {
-  const { fetchBlogs, blogs } = useContext(Context); 
+  const { fetchBlogs, blogs, token } = useContext(Context); 
   const [isCreating, setIsCreating] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
 
   useEffect(() => {
-   
+    if (!token) {
+      toast.error("Unauthorized access. Please log in.");
+      return;
+    }
     fetchBlogs();
-  }, [fetchBlogs]); 
-  
+  }, [fetchBlogs, token]); 
 
   const handleCreateBlog = () => {
     setIsCreating(true);
@@ -32,27 +34,25 @@ const BlogManagement = () => {
         method: SummaryApi.deleteBlog.method,
         credentials: "include",
         headers: {
-          "Content-Type": "application/json"
+          "Authorization": `Bearer ${token}`, 
         },
       });
-  
-      const responseData = await response.json();
-  
+
       if (!response.ok) {
-        throw new Error(responseData.message || "Network response was not ok");
+        throw new Error("Network response was not ok");
       }
-  
+
+      const responseData = await response.json();
       if (!responseData.success) {
-        toast.error(responseData.message || "Failed to delete blog.");
+        toast.error("Failed to delete blog.");
       } else {
         toast.success("Blog deleted successfully!");
         await fetchBlogs();
       }
     } catch (error) {
-      toast.error(error.message || "Failed to delete the blog. Please try again.");
+      toast.error("Failed to delete the blog. Please try again.");
     }
   };
-  
 
   return (
     <div className="container mx-auto p-4">
