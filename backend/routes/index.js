@@ -1,5 +1,4 @@
 const express = require('express')
-
 const router = express.Router()
 
 const userSignUpController = require("../controller/user/userSignUp")
@@ -22,6 +21,10 @@ const getMarketController = require('../controller/product/getUserMarket')
 const marketRecordController = require('../controller/product/marketRecord')
 const { getAllUserMarkets, updateMarketStatus } = require('../controller/product/userMarketController')
 const { createBlogNote, getAllBlogNotes, updateBlogNote, deleteBlogNote } = require('../controller/blogNoteController')
+const { sendMessage, markMessagesAsRead } = require('../controller/chatController')
+const { getAllAdmins } = require('../controller/adminController')
+const getUserMessage = require('../controller/getUserMessage')
+const { receiveMessage, sendReply } = require('../controller/adminChatController')
 
 router.post("/signup", userSignUpController)
 router.post("/signin",userSignInController)
@@ -33,11 +36,14 @@ router.get("/all-user",authToken,allUsers)
 router.post("/update-user",authToken,updateUser)
 router.get("/get-all-users-market",authToken, getAllUserMarkets)
 router.post("/update-market-status/:id", updateMarketStatus)
+router.post('/receive',receiveMessage);
+router.post('/reply', sendReply);
+
 
 //product
 router.post("/upload-product",authToken,UploadProductController)
 router.get("/get-product",getProductController)
-router.post("/update-product ",authToken,updateProductController)
+router.post("/update-product",authToken,updateProductController)
 router.get("/get-categoryProduct",getCategoryProduct)
 router.post("/category-product",getCategoryWiseProduct)
 router.post("/product-details",getProductDetails)
@@ -55,4 +61,18 @@ router.get("/get-blogs",getAllBlogNotes)
 router.put("/update-blog/:id",updateBlogNote)
 router.delete("/delete-blog/:id",deleteBlogNote)
 
+//chat
+router.post("/send-message", authToken, sendMessage);
+router.put("/mark-as-read/:senderId", authToken, markMessagesAsRead);
+router.get("/getusermessage",authToken, getUserMessage);
+
+
+//admin
+router.get("/admins",authToken, getAllAdmins);
+
+
+
+
 module.exports = router
+
+

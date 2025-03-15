@@ -1,4 +1,4 @@
-const backendDomain = "http://localhost:27017";
+const backendDomain = "http://localhost:5000";
 
 const SummaryApi = {
     signUP : {
@@ -99,7 +99,36 @@ const SummaryApi = {
         url : `${backendDomain}/api/delete-blog`,
         method : 'delete'
     },
+    
+    sendMessage: {
+        url: `${backendDomain}/api/send-message`,
+        method: "POST"
+    },
+   
+    markMessagesAsRead: {
+        url: `${backendDomain}/api/mark-as-read/:senderId`,
+        method: "PUT"
+    },
+    getAdmins: {
+        url: `${backendDomain}/api/admins`,
+        method: "GET"
+    },
+    getUserMessage: {
+        url: `${backendDomain}/api/getusermessage`,
+        method: "GET"
+    },
+    adminGetMessages: {
+        url: `${backendDomain}/api/receive`,
+        method: "POST"
+    },
+    adminSendMessage: {
+        url: `${backendDomain}/api/reply`,
+        method: "POST"
+    },
+    
+
+  
    
 }
 
-export default SummaryApi
+export default SummaryApi;

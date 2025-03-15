@@ -22,6 +22,8 @@ import UserMarket from "../pages/UserMarket";
 import Net from "../Components/Net";
 import UsersMarket from "../pages/UsersMarket";
 import BlogManagementPage from "../pages/BlogManagement";
+import LiveChat from "../pages/LiveChat";
+import AdminChat from "../pages/AdminChat";
 
 
 const publicRoutes = [
@@ -55,6 +57,7 @@ const protectedRoutes = [
   { path: "wallet", element: <Wallet /> },
   { path: "profile", element: <Profile /> },
   { path: "settings", element: <Settings /> },
+  { path: "chat", element: <LiveChat/>},
 ];
 
 const adminRoutes = [
@@ -62,7 +65,8 @@ const adminRoutes = [
   { path: "all-products", element: <AllProducts /> },
   { path: "users-market", element: <UsersMarket /> },
   { path: "system-blog", element: <BlogManagementPage /> },
-  
+  { path: "admin-chat", element: <AdminChat /> },
+
 ];
 
 const router = createBrowserRouter([

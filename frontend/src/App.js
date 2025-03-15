@@ -8,6 +8,7 @@ import Context from "./Context";
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserDetailsAPI, fetchMarketDataAPI, fetchBlogsAPI } from "./services/apiService";
 import "./styles/Loader.css";
+import { ChatProvider } from "./Context/chatContext";
 
 const Header = lazy(() => import("./Components/Header"));
 const Footer = lazy(() => import("./Components/Footer"));
@@ -60,6 +61,7 @@ function App() {
   }
 
   return (
+    <ChatProvider>
     <Context.Provider value={{ fetchUserDetails, fetchMarketData, marketData, user, fetchBlogs, blogs }}>
       <Suspense fallback={<Loader />}>
         <Net blogs={blogs} fetchBlogs={fetchBlogs} />
@@ -82,6 +84,8 @@ function App() {
         theme="colored"
       />
     </Context.Provider>
+    </ChatProvider>
+
   );
 }
 

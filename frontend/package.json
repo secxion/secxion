@@ -5,6 +5,7 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.2.5",
     "@tanstack/react-query": "^5.67.1",
+    "@tanstack/react-query-persist-client": "^5.67.1",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -14,6 +15,7 @@
     "cors": "^2.8.5",
     "framer-motion": "^12.0.5",
     "https-browserify": "^1.0.0",
+    "idb": "^8.0.2",
     "lucide-react": "^0.474.0",
     "moment": "^2.30.1",
     "react": "^18.3.1",
@@ -25,8 +27,10 @@
     "react-spinners": "^0.15.0",
     "react-toastify": "^10.0.5",
     "redux-persist": "^6.0.0",
+    "socket.io-client": "^4.8.1",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
+    "timeago.js": "^4.0.2",
     "url": "^0.11.4",
     "util": "^0.12.5",
     "web-vitals": "^2.1.4"

@@ -8,6 +8,7 @@ import { Provider } from "react-redux";
 import { store, persistor } from "./store/store";
 import { PersistGate } from "redux-persist/integration/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ContextProvider } from "./Context";  // ✅ Import ContextProvider
 
 const queryClient = new QueryClient();
 
@@ -16,7 +17,9 @@ root.render(
   <Provider store={store}>
     <PersistGate loading={<div>Loading app...</div>} persistor={persistor}>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
+        <ContextProvider>  {/* ✅ Wrap app inside ContextProvider */}
+          <RouterProvider router={router} />
+        </ContextProvider>
       </QueryClientProvider>
     </PersistGate>
   </Provider>

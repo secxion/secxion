@@ -41,7 +41,7 @@ const AdminPanel = () => {
         { path: "all-users", label: "👥 All Users" },
         { path: "all-products", label: "📦 All Products" },
         { path: "users-market", label: "🛒 Users' Market" },
-        { path: "users-report", label: "📊 Users' Report" },
+        { path: "admin-chat", label: "📊 Chat" },
         { path: "users-datapad", label: "📱 Users' Datapad" },
         { path: "users-wallet", label: "💰 Users' Wallet" },
         { path: "system-blog", label: "📝 System Blog" }
