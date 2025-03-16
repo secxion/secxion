@@ -53,6 +53,11 @@ io.use((socket, next) => {
     if (authCookie) token = authCookie.split("=")[1];
   }
 
+  if (!token) {
+    console.log("❌ No JWT token provided for WebSocket connection.");
+    return next(new Error("Authentication error: No token provided"));
+  }
+
   token = token.replace("Bearer ", "");
 
   if (!process.env.TOKEN_SECRET_KEY) {
