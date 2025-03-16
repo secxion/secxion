@@ -54,7 +54,7 @@ export const ChatProvider = ({ children }) => {
         const data = await response.json();
   
         if (data.success && data.admins.length > 0) {
-          setAdminId(data.admins[0]._id); 
+          setAdminId(data.admins[0]._id); // ✅ Use first admin if no logged-in admin
           console.log("🟢 Fallback to first admin:", data.admins[0]._id);
         } else {
           console.error("🔴 No admin found:", data);
@@ -74,19 +74,18 @@ export const ChatProvider = ({ children }) => {
   const sendMessage = async (message, senderId, recipientId = null) => {
     try {
       if (!recipientId) {
-        recipientId = adminId; 
+        recipientId = adminId; // Default to Admin if no recipient is specified
       }
 
       const response = await axios.post(
         SummaryApi.sendMessage.url,
-        { senderId, recipientId, message },
+        { senderId, recipientId, message }, // ✅ Corrected field name
         {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("token")}`,
             "Content-Type": "application/json",
           },
           withCredentials: true,
-          credentials: "include",
         }
       );
 
