@@ -7,14 +7,9 @@ const connectDB = require("./config/db");
 const router = require("./routes");
 const helmet = require("helmet");
 const morgan = require("morgan");
-const mysql = require("mysql2/promise");
-const http = require("http");
-const { Server } = require("socket.io");
-const { socketHandler } = require("./controller/chatController");
 const authToken = require("./middleware/authToken");
 
 const app = express();
-const server = http.createServer(app);
 
 // Set frontend domain
 const FRONTEND_URL = process.env.FRONTEND_URL || "https://secxion-bmxii.vercel.app";
@@ -45,17 +40,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan("combined"));
 
-// WebSocket Setup
-const io = new Server(server, {
-  cors: {
-    origin: FRONTEND_URL,
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-});
-
-socketHandler(io);
-
 // API Routes
 app.use("/api", router);
 
@@ -72,7 +56,7 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 connectDB().then(() => {
-  server.listen(PORT, () => {
+  app.listen(PORT, () => {
     console.log("✅ Connected to DB");
     console.log(`🚀 Server running on port ${PORT}`);
   });
