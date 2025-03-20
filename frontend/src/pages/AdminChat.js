@@ -10,7 +10,7 @@ const socket = io(process.env.REACT_APP_BACKEND_URL || "http://localhost:5000", 
 });
 
 const AdminChat = () => {
-  const [users, setUsers] = useState([]);  // ✅ Store users correctly
+  const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const admin = useSelector((state) => state.user.user); // Get current admin from Redux
@@ -40,7 +40,7 @@ const AdminChat = () => {
       console.log("Fetched Users Response:", data);
 
       if (data.success && Array.isArray(data.data)) {
-        setUsers(data.data);  // ✅ Correctly save users
+        setUsers(data.data);
       } else {
         toast.error("Failed to fetch users");
         setUsers([]); // Prevent UI crashes
@@ -54,24 +54,28 @@ const AdminChat = () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <div className="w-1/4 bg-white p-4 border-r shadow-md">
+      {/* Sidebar (Scrollable User List) */}
+      <div className="w-1/4 bg-white p-4 border-r shadow-md flex flex-col">
         <h2 className="text-lg font-bold mb-4">Users</h2>
-        {users.length > 0 ? (
-          users.map((user) => (
-            <div
-              key={user._id}
-              className={`p-2 mb-2 rounded-lg cursor-pointer ${
-                selectedUser?._id === user._id ? "bg-blue-500 text-white" : "bg-gray-200"
-              }`}
-              onClick={() => setSelectedUser(user)}
-            >
-              <p>{user.name ? user.name : `User ${user._id}`}</p> {/* ✅ Fix Name Display */}
-            </div>
-          ))
-        ) : (
-          <p>No users available</p>
-        )}
+        
+        {/* Scrollable User List */}
+        <div className="overflow-auto flex-1">
+          {users.length > 0 ? (
+            users.map((user) => (
+              <div
+                key={user._id}
+                className={`p-2 mb-2 rounded-lg cursor-pointer ${
+                  selectedUser?._id === user._id ? "bg-blue-500 text-white" : "bg-gray-200"
+                }`}
+                onClick={() => setSelectedUser(user)}
+              >
+                <p>{user.name ? user.name : `User ${user._id}`}</p> {/* ✅ Fix Name Display */}
+              </div>
+            ))
+          ) : (
+            <p>No users available</p>
+          )}
+        </div>
       </div>
 
       {/* Chat Panel */}

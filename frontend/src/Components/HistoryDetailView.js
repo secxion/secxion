@@ -51,9 +51,10 @@ const HistoryDetailView = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center p-4 z-50">
-      <div className="bg-white p-6 rounded-2xl w-full max-w-2xl shadow-lg transition-transform transform scale-95 hover:scale-100 duration-300"
-           style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+    <div className="fixed inset-0 flex items-start justify-center bg-gray-800 bg-opacity-50 p-4 z-50">
+  <div className="bg-white p-6 rounded-2xl w-full max-w-2xl shadow-lg mt-20"
+       style={{ maxHeight: '85vh', overflowY: 'auto' }}>
+
         
         <div className="flex justify-between items-center mb-6">
           <h2 className="font-extrabold text-2xl text-gray-800">Record Details</h2>
@@ -95,7 +96,7 @@ const HistoryDetailView = ({
                     <img
                       src={el}
                       alt={`product-${index}`}
-                      className="w-20 h-20 object-cover rounded-lg border cursor-pointer hover:scale-105 transition-transform duration-200"
+                      className="w-20 h-20 object-cover rounded-lg border cursor-pointer "
                       onClick={() => {
                         setOpenFullScreenImage(true);
                         setFullScreenImage(el);

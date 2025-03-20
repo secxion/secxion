@@ -42,6 +42,29 @@ const ChangeUserRole = ({
         }
     };
 
+    const deleteUser = async () => {
+        if (!window.confirm("Are you sure you want to delete this user?")) return;
+
+        const fetchResponse = await fetch(SummaryApi.deleteUser.url, {
+            method: SummaryApi.deleteUser.method,
+            credentials: 'include',
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({ userId })
+        });
+
+        const responseData = await fetchResponse.json();
+
+        if (responseData.success) {
+            toast.success("User deleted successfully.");
+            onClose();
+            callFunc();
+        } else {
+            toast.error(responseData.message);
+        }
+    };
+
     return (
         <div className='fixed top-0 bottom-0 left-0 right-0 w-full h-full z-10 flex justify-center items-center bg-purple-600 bg-opacity-50'>
             <div className='bg-yellow-600 shadow-md p-6 w-full max-w-sm rounded-lg'>
@@ -56,15 +79,19 @@ const ChangeUserRole = ({
 
                 <div className='flex items-center justify-between my-4'>
                     <p className='text-gray-700'>Role:</p>  
-                    <select className='border px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500' value={userRole} onChange={handleOnChangeSelect}>
+                    <select className='border px-4 py-2 rounded' value={userRole} onChange={handleOnChangeSelect}>
                         {Object.values(ROLE).map(el => (
                             <option value={el} key={el}>{el}</option>
                         ))}
                     </select>
                 </div>
 
-                <button className='w-fit mx-auto block py-2 px-4 rounded-full bg-red-600 text-white hover:bg-red-700 transition' onClick={updateUserRole}>
+                <button className='w-full py-2 bg-blue-600 text-white rounded mb-2' onClick={updateUserRole}>
                     Change Role
+                </button>
+
+                <button className='w-full py-2 bg-red-600 text-white rounded' onClick={deleteUser}>
+                    Delete User
                 </button>
             </div>
         </div>

@@ -34,30 +34,25 @@ export const ChatProvider = ({ children }) => {
         const loggedInAdmin = JSON.parse(localStorage.getItem("admin")); 
         if (loggedInAdmin && loggedInAdmin._id) {
           setAdminId(loggedInAdmin._id);
-          console.log("🟢 Using logged-in admin:", loggedInAdmin._id);
           return;
         }
   
-        const response = await fetch(SummaryApi.getAdmins.url, {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
+        if (!adminId) { 
+          const response = await fetch(SummaryApi.getAdmins.url, {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${localStorage.getItem("token")}`,
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          });
   
-        if (!response.ok) {
-          throw new Error(`HTTP Error: ${response.status}`);
-        }
+          if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
   
-        const data = await response.json();
-  
-        if (data.success && data.admins.length > 0) {
-          setAdminId(data.admins[0]._id); // ✅ Use first admin if no logged-in admin
-          console.log("🟢 Fallback to first admin:", data.admins[0]._id);
-        } else {
-          console.error("🔴 No admin found:", data);
+          const data = await response.json();
+          if (data.success && data.admins.length > 0) {
+            setAdminId(data.admins[0]._id);
+          }
         }
       } catch (error) {
         console.error("🔴 Error fetching admin:", error);
@@ -65,27 +60,24 @@ export const ChatProvider = ({ children }) => {
     };
   
     fetchAdmin();
-  }, []);
+  }, [adminId]); 
   
-  
-  
-  
-
   const sendMessage = async (message, senderId, recipientId = null) => {
     try {
       if (!recipientId) {
-        recipientId = adminId; // Default to Admin if no recipient is specified
+        recipientId = adminId; 
       }
 
       const response = await axios.post(
         SummaryApi.sendMessage.url,
-        { senderId, recipientId, message }, // ✅ Corrected field name
+        { senderId, recipientId, message },
         {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("token")}`,
             "Content-Type": "application/json",
           },
           withCredentials: true,
+          credentials: "include",
         }
       );
 

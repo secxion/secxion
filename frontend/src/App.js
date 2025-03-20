@@ -1,24 +1,23 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense } from "react";
 import { Outlet } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserDetails, setLoading } from "./store/userSlice";
 import Context from "./Context";
+import { useQuery } from "@tanstack/react-query";
 import { fetchUserDetailsAPI, fetchMarketDataAPI, fetchBlogsAPI } from "./services/apiService";
 import "./styles/Loader.css";
 import { ChatProvider } from "./Context/chatContext";
-import { io } from "socket.io-client"; 
+import "./App.css";
 
 const Header = lazy(() => import("./Components/Header"));
 const Footer = lazy(() => import("./Components/Footer"));
 const Net = lazy(() => import("./Components/Net"));
-
-const SERVER_URL = "https://secxion-f.onrender.com"; 
+// const Navbar = lazy(() => import("./Components/Navbar"));
 
 function Loader() {
   return (
-   
     <div className="loader-container">
       <div className="loader"></div>
       <p className="loading-text">Loading, please wait...</p>
@@ -30,110 +29,51 @@ function App() {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user.user);
 
-  const [marketData, setMarketData] = useState(null);
-  const [blogs, setBlogs] = useState(null);
-  const [loading, setLoadingState] = useState(false);
-  const [socket, setSocket] = useState(null); 
-
-  const fetchUserDetails = async () => {
-    try {
+  const { refetch: fetchUserDetails, isLoading: isUserLoading } = useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
       dispatch(setLoading(true));
       const res = await fetchUserDetailsAPI();
+      dispatch(setLoading(false));
+
       if (res.success) {
         dispatch(setUserDetails(res.data));
+        return res.data;
       } else {
         dispatch(setUserDetails(null));
+        return null;
       }
-    } catch (error) {
-      console.error("❌ Error fetching user details:", error);
-    } finally {
-      dispatch(setLoading(false));
-    }
-  };
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const fetchMarketData = async () => {
-    try {
-      setLoadingState(true);
-      const data = await fetchMarketDataAPI();
-      setMarketData(data);
-    } catch (error) {
-      console.error("❌ Error fetching market data:", error);
-    } finally {
-      setLoadingState(false);
-    }
-  };
+  const { data: marketData, refetch: fetchMarketData, isLoading: isMarketLoading } = useQuery({
+    queryKey: ["marketData"],
+    queryFn: fetchMarketDataAPI,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const fetchBlogs = async () => {
-    try {
-      setLoadingState(true);
-      const data = await fetchBlogsAPI();
-      setBlogs(data);
-    } catch (error) {
-      console.error("❌ Error fetching blogs:", error);
-    } finally {
-      setLoadingState(false);
-    }
-  };
+  const { data: blogs, refetch: fetchBlogs, isLoading: isBlogsLoading } = useQuery({
+    queryKey: ["blogs"],
+    queryFn: fetchBlogsAPI,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    fetchUserDetails();
-    fetchMarketData();
-    fetchBlogs();
-
-    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-
-    if (!token) {
-      console.warn("⚠️ No token found, skipping WebSocket connection.");
-      return;
-    }
-  
-    console.log("🟢 Connecting WebSocket with Token:", `Bearer ${token}`);
-  
-    const socketInstance = io(SERVER_URL, {
-      auth: { token: `Bearer ${token}` }, 
-      transports: ["websocket", "polling"],
-      reconnectionAttempts: 10,  
-      reconnectionDelay: 3000,   
-      reconnectionDelayMax: 10000 
-    });
-  
-    setSocket(socketInstance);
-  
-    socketInstance.on("connect", () => {
-      console.log("✅ WebSocket Connected:", socketInstance.id);
-    });
-  
-    socketInstance.on("disconnect", (reason) => {
-      console.warn("🔴 WebSocket Disconnected:", reason);
-      if (reason === "io server disconnect") {
-        socketInstance.connect(); 
-      }
-    });
-  
-    socketInstance.on("connect_error", (err) => {
-      console.error("❌ WebSocket Connection Error:", err.message);
-    });
-  
-    return () => {
-      console.log("⚠️ Disconnecting WebSocket...");
-      socketInstance.disconnect();
-    };
-  }, []);
-
-  if (loading) {
+  if (isUserLoading || isMarketLoading || isBlogsLoading) {
     return <Loader />;
   }
 
   return (
     <ChatProvider>
-      <Context.Provider value={{ fetchUserDetails, fetchMarketData, marketData, user, fetchBlogs, blogs, socket }}>
+      <Context.Provider value={{ fetchUserDetails, fetchMarketData, marketData, user, fetchBlogs, blogs }}>
         <Suspense fallback={<Loader />}>
-          <Net blogs={blogs} fetchBlogs={fetchBlogs} />
-          <Header />
-          <main className="min-h-[calc(100vh-120px)] pt-16 mt-6">
+          {/* {user && <Navbar />} */}
+          {user && <Net blogs={blogs} fetchBlogs={fetchBlogs} />} 
+          <main className="min-h-[calc(100vh-120px)] pt-1 mt-6">
+            {user && <Header />} 
             <Outlet />
           </main>
-          <Footer />
+          <Footer /> 
         </Suspense>
         <ToastContainer 
           position="top-right" 

@@ -3,10 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import SummaryApi from "../common";
 import { toast } from "react-toastify";
 import Context from "../Context";
+import Footer from "../Components/Footer";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [data, setData] = useState({ email: "", password: "" });
   const [errorMessage, setErrorMessage] = useState("");
@@ -16,8 +16,6 @@ const Login = () => {
   useEffect(() => {
     if (isLoggedIn) {
       navigate("/");
-    } else {
-      setLoading(false);
     }
   }, [isLoggedIn, navigate]);
 
@@ -56,68 +54,57 @@ const Login = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-xl font-bold text-gray-700">Loading...</div>
-      </div>
-    );
-  }
-
   return (
-    <section id="login" className="min-h-screen bg-gradient-to-r from-blue-500 via-yellow-500 to-red-500 flex items-center justify-center overflow-hidden">
-      <div className="bg-[#F5F5DC] p-6 w-full max-w-md rounded-2xl shadow-lg"> 
-        <div className="w-20 h-20 mx-auto overflow-hidden rounded-full bg-gray-200 flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="50" fill="#D8CBAF" /> 
-            <text x="50%" y="50%" textAnchor="middle" fill="#4A4A4A" fontSize="40" fontWeight="bold" dy=".3em">S</text> 
-          </svg>
+    <section className="w-screen h-screen flex items-center justify-center bg-[#F5F5DC] fixed top-0 left-0 overflow-hidden">
+      <div className="bg-white p-8 w-full max-w-md rounded-xl shadow-lg">
+        {/* Logo */}
+        <div className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center text-3xl font-bold text-gray-700 dark:text-gray-200">
+          S
         </div>
-
-        <form className="pt-6 flex flex-col gap-4" onSubmit={handleSubmit}>
+        
+        {/* Form */}
+        <form className="w-full mt-6 flex flex-col gap-4" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-gray-700 font-semibold">Email:</label>
-            <div className="bg-gray-100 p-2 rounded-lg">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                name="email"
-                value={data.email}
-                onChange={handleOnChange}
-                className="w-full bg-transparent outline-none"
-                required
-              />
-            </div>
+            <label className="block text-gray-700 dark:text-gray-300 font-semibold">Email</label>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              name="email"
+              value={data.email}
+              onChange={handleOnChange}
+              className="w-full bg-gray-100 dark:bg-gray-700 p-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
           </div>
 
           <div>
-            <label className="block text-gray-700 font-semibold">Password:</label>
-            <div className="bg-gray-100 p-2 flex items-center rounded-lg">
+            <label className="block text-gray-700 dark:text-gray-300 font-semibold">Password</label>
+            <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
                 name="password"
                 value={data.password}
                 onChange={handleOnChange}
-                className="w-full bg-transparent outline-none"
+                className="w-full bg-gray-100 dark:bg-gray-700 p-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
               <button
                 type="button"
-                className="ml-2 text-gray-600 hover:text-gray-800 transition"
+                className="absolute right-3 top-3 text-gray-600 dark:text-gray-400"
                 onClick={() => setShowPassword((prev) => !prev)}
               >
                 {showPassword ? "🙈" : "👁️"}
               </button>
             </div>
-            <Link to="/reset" className="block text-right text-sm text-red-600 hover:underline mt-1">
+            <Link to="/reset" className="block text-right text-sm text-blue-500 hover:underline mt-1">
               Forgot password?
             </Link>
           </div>
 
           <button 
             type="submit"
-            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-full transition transform hover:scale-105 disabled:opacity-50"
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition duration-300"
             disabled={formSubmitting}
           >
             {formSubmitting ? "Logging in..." : "Login"}
@@ -128,11 +115,9 @@ const Login = () => {
           <div className="mt-4 text-center text-red-600">{errorMessage}</div>
         )}
 
-        <p className="mt-6 text-center text-gray-600">
-          Don't have an account?{" "}
-          <Link to="/sign-up" className="text-blue-500 hover:underline hover:text-blue-700">
-            Sign up
-          </Link>
+        <p className="mt-6 text-center text-gray-600 dark:text-gray-400">
+          Don't have an account? {" "}
+          <Link to="/sign-up" className="text-blue-500 hover:underline">Sign up</Link>
         </p>
       </div>
     </section>

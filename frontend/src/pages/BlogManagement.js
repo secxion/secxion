@@ -2,18 +2,17 @@ import React, { useEffect, useState, useContext } from "react";
 import BlogForm from "../Components/BlogForm";
 import BlogCard from "../Components/BlogCard";
 import { toast } from "react-toastify";
-import SummaryApi from "../common";
+import SummaryApi from "../common"; 
 import Context from "../Context";
 
 const BlogManagement = () => {
-  const { fetchBlogs, blogs, token } = useContext(Context);
+  const { fetchBlogs, blogs } = useContext(Context); 
   const [isCreating, setIsCreating] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
 
   useEffect(() => {
-    
-    fetchBlogs().catch((err) => toast.error("Failed to fetch blogs"));
-  }, [fetchBlogs, token]);
+    fetchBlogs();
+  }, [fetchBlogs]); 
 
   const handleCreateBlog = () => {
     setIsCreating(true);
@@ -29,23 +28,21 @@ const BlogManagement = () => {
     try {
       const response = await fetch(`${SummaryApi.deleteBlog.url}/${id}`, {
         method: SummaryApi.deleteBlog.method,
-        credentials: "include",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
       });
 
-      const responseData = await response.json();
-
-      if (!response.ok || !responseData.success) {
-        throw new Error(responseData.message || "Failed to delete blog.");
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
       }
 
-      toast.success("Blog deleted successfully!");
-      await fetchBlogs();
+      const responseData = await response.json();
+      if (responseData.success) {
+        await fetchBlogs(); 
+        toast.error("failed");
+      } else {
+        toast.success("Blog deleted successfully!");
+      }
     } catch (error) {
-      toast.error(error.message || "Failed to delete the blog. Please try again.");
+      toast.error("Failed to delete the blog. Please try again.");
     }
   };
 

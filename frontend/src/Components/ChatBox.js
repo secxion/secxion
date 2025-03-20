@@ -1,11 +1,9 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import { FaPaperPlane } from "react-icons/fa";
 import SummaryApi from "../common";
 import { toast } from "react-toastify";
 
-const ChatBox = ({ userId, recipientId }) => {
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState("");
+const ChatBox = ({ userId, recipientId, messages, setMessages }) => {
   const chatEndRef = useRef(null);
 
   const fetchMessages = useCallback(async () => {
@@ -27,27 +25,19 @@ const ChatBox = ({ userId, recipientId }) => {
         toast.error(data.message);
       }
     } catch (error) {
-      console.error("Error fetching messages:", error);
       toast.error("Failed to fetch messages");
     }
-  }, [userId, recipientId]);
+  }, [userId, recipientId, setMessages]);
 
   useEffect(() => {
     fetchMessages();
   }, [fetchMessages]);
 
-  
-
-
-  const handleMessageChange = (e) => {
-    setNewMessage(e.target.value);
-  };
-
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!messages.newMessage.trim()) return;
 
-    const messageData = { senderId: userId, recipientId, message: newMessage };
+    const messageData = { senderId: userId, recipientId, message: messages.newMessage };
 
     try {
       const response = await fetch(SummaryApi.sendMessage.url, {
@@ -60,13 +50,11 @@ const ChatBox = ({ userId, recipientId }) => {
       const data = await response.json();
       if (data.success) {
         setMessages((prevMessages) => [...prevMessages, data.data]);
-        setNewMessage("");
         scrollToBottom();
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-      console.error("Error sending message:", error);
       toast.error("Failed to send message");
     }
   };
@@ -75,24 +63,18 @@ const ChatBox = ({ userId, recipientId }) => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault(); // Prevent default behavior of Enter key
-      handleSendMessage(e); // Send message
-    }
-  };
-
   return (
-    <div className="p-4 bg-white rounded-lg shadow-lg max-w-lg mx-auto">
-      <div className="h-80 overflow-y-auto border-b pb-2">
+    <div className=" pb-48 flex flex-col h-full">
+      {/* Chat Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-gray-900">
         {messages.length > 0 ? (
           messages.map((msg, index) => (
             <div
               key={index}
-              className={`mb-2 p-2 rounded-lg text-sm ${
+              className={`p-3 rounded-lg max-w-xs ${
                 msg.senderId === userId
-                  ? "bg-blue-500 text-white self-end"
-                  : "bg-gray-300 text-gray-800 self-start"
+                  ? "ml-auto bg-blue-500 text-white"
+                  : "mr-auto bg-gray-300 text-gray-900"
               }`}
             >
               {msg.message}
@@ -104,13 +86,13 @@ const ChatBox = ({ userId, recipientId }) => {
         <div ref={chatEndRef}></div>
       </div>
 
-      <form onSubmit={handleSendMessage} className="mt-4 flex items-center">
+      {/* Message Input */}
+      <form onSubmit={handleSendMessage} className="p-4 bg-white dark:bg-gray-800 border-t flex items-center">
         <textarea
           placeholder="Type a message..."
-          value={newMessage}
-          onChange={handleMessageChange}
-          onKeyDown={handleKeyDown}
-          className="flex-1 p-2 border rounded-lg focus:ring focus:ring-blue-300"
+          value={messages.newMessage || ""}
+          onChange={(e) => setMessages({ ...messages, newMessage: e.target.value })}
+          className="flex-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           rows={2}
         />
         <button

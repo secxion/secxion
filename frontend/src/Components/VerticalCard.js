@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import scrollTop from "../helpers/scrollTop";
-import { motion } from "framer-motion";
 import "./VerticalCard.css";
 
 const VerticalCard = React.memo(({ loading, data = [] }) => {
@@ -12,7 +11,7 @@ const VerticalCard = React.memo(({ loading, data = [] }) => {
   }
 
   return (
-    <>
+    <div className="max-h-[calc(100vh-140px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4">
       {loading
         ? loadingList.map((_, index) => (
             <div
@@ -25,14 +24,9 @@ const VerticalCard = React.memo(({ loading, data = [] }) => {
             </div>
           ))
         : data.map((product) => (
-            <motion.div
+            <div
               key={product._id}
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }} 
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.2 }} 
-              className="bg-white p-4 rounded-lg shadow-xl transition-transform transform hover:scale-105 hover:shadow-2xl hover:border-blue-500 border border-gray-300"
+              className="bg-white p-4 rounded-lg shadow-xl border border-gray-300 transition-transform transform hover:shadow-2xl hover:border-blue-500"
             >
               <Link to={`/product/${product._id}`} onClick={scrollTop} className="block">
                 <div className="h-32 overflow-hidden rounded-lg mb-4 bg-gray-100 flex items-center justify-center border-b border-gray-300 shadow-sm">
@@ -49,9 +43,9 @@ const VerticalCard = React.memo(({ loading, data = [] }) => {
                   </h3>
                 </div>
               </Link>
-            </motion.div>
+            </div>
           ))}
-    </>
+    </div>
   );
 });
 

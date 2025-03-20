@@ -25,6 +25,7 @@ const { sendMessage, markMessagesAsRead } = require('../controller/chatControlle
 const { getAllAdmins } = require('../controller/adminController')
 const getUserMessage = require('../controller/getUserMessage')
 const { receiveMessage, sendReply } = require('../controller/adminChatController')
+const deleteUser = require('../controller/user/deleteUser')
 
 router.post("/signup", userSignUpController)
 router.post("/signin",userSignInController)
@@ -38,6 +39,7 @@ router.get("/get-all-users-market",authToken, getAllUserMarkets)
 router.post("/update-market-status/:id", updateMarketStatus)
 router.post('/receive',receiveMessage);
 router.post('/reply', sendReply);
+router.post("/delete-user", deleteUser);
 
 
 //product

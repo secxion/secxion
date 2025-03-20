@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect } from "react";
-import SummaryApi from "../common"; 
+import SummaryApi from "../common";
 
 const Context = createContext(null);
 
@@ -46,23 +46,21 @@ export const ContextProvider = ({ children }) => {
     try {
       const response = await fetch(SummaryApi.userDetails.url, {
         method: SummaryApi.userDetails.method,
-        headers: getAuthHeaders(),       
-        credentials: "include",
+        headers: getAuthHeaders(),
       });
-    
 
       if (!response.ok) {
         throw new Error("Failed to fetch user details");
       }
 
       const data = await response.json();
-      setUser(data); 
+      setUser(data); // Assuming the response contains user data
     } catch (error) {
       console.error("Error fetching user details:", error);
     }
   };
 
-  const isLoggedIn = !!user; 
+  const isLoggedIn = !!user;
 
   return (
     <Context.Provider value={{ user, token, login, logout, getAuthHeaders, fetchUserDetails, isLoggedIn, loading }}>

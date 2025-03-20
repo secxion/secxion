@@ -83,7 +83,7 @@ const Header = () => {
 
   return (
     <nav className="h-16 bg-white shadow-lg fixed w-full z-50 border-b-2 border-gray-400 transition-all duration-300">
-      <div className="h-full container mx-auto flex items-center justify-between px-4">
+      <div className="h-full w-full container mx-auto flex items-center justify-between px-4">
         {user?._id && (
           <div className="flex items-center flex-shrink-0">
             <Link to="/">

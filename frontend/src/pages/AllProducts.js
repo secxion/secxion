@@ -29,12 +29,12 @@ const AllProducts = () => {
   const { data: allProduct = [], isLoading, error, refetch } = useQuery({
     queryKey: ["allProducts"],
     queryFn: fetchAllProducts,
-    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
-    retry: 2, // Retry 2 times if the request fails
+    staleTime: 1000 * 60 * 5,
+    retry: 2, 
   });
 
   return (
-    <div className="container mx-auto p-4">
+    <div className=" mx-auto p-4">
       <header className="bg-white py-2 px-4 flex justify-between items-center shadow-md rounded">
         <h2 className="font-bold text-lg">Products</h2>
         <button
